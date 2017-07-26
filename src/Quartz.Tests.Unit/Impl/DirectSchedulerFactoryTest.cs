@@ -20,8 +20,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+
 using NUnit.Framework;
+
 using Quartz.Impl;
 using Quartz.Simpl;
 using Quartz.Spi;
@@ -68,19 +71,19 @@ namespace Quartz.Tests.Unit.Impl
 				this.result = result;
 			}
 
-			public Task Initialize(string name, IScheduler scheduler)
+			public Task Initialize(string name, IScheduler scheduler, CancellationToken cancellationToken)
 			{
 				result.Append(name).Append("|").Append(scheduler.SchedulerName);
                 return TaskUtil.CompletedTask;
             }
 
-            Task ISchedulerPlugin.Start()
+            Task ISchedulerPlugin.Start(CancellationToken cancellationToken)
 		    {
 		        result.Append("|Start");
                 return TaskUtil.CompletedTask;
 		    }
 
-			public Task Shutdown()
+			public Task Shutdown(CancellationToken cancellationToken)
 			{
 				result.Append("|Shutdown");
                 return TaskUtil.CompletedTask;

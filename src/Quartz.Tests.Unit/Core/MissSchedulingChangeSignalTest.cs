@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 
 using Quartz.Impl;
-using Quartz.Logging;
 
 namespace Quartz.Tests.Unit.Core
 {
@@ -72,7 +71,6 @@ namespace Quartz.Tests.Unit.Core
     public class CollectDurationBetweenFireTimesJob : IJob
     {
         private static DateTime? lastFireTime;
-        private static readonly List<TimeSpan> durationBetweenFireTimes = new List<TimeSpan>();
         private static readonly ILog log = LogProvider.GetLogger(typeof (CollectDurationBetweenFireTimesJob));
 
         public Task Execute(IJobExecutionContext context)
@@ -81,13 +79,13 @@ namespace Quartz.Tests.Unit.Core
             log.Info("Fire time: " + now);
             if (lastFireTime != null)
             {
-                durationBetweenFireTimes.Add(now - lastFireTime.Value);
+                Durations.Add(now - lastFireTime.Value);
             }
 
             lastFireTime = now;
             return Task.FromResult(0);
         }
 
-        public static List<TimeSpan> Durations => durationBetweenFireTimes;
+        public static List<TimeSpan> Durations { get; } = new List<TimeSpan>();
     }
 }

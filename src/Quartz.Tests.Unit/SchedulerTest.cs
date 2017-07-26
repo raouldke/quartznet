@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,6 +11,9 @@ using Quartz.Impl;
 using Quartz.Impl.Matchers;
 using Quartz.Job;
 using Quartz.Spi;
+#if BINARY_SERIALIZATION
+using System.IO;
+#endif
 
 namespace Quartz.Tests.Unit
 {
@@ -151,8 +153,8 @@ namespace Quartz.Tests.Unit
             Assert.AreEqual(2, jobGroups.Count, "Job group list size expected to be = 2 ");
             Assert.AreEqual(2, triggerGroups.Count, "Trigger group list size expected to be = 2 ");
 
-            ISet<JobKey> jobKeys = await sched.GetJobKeys(GroupMatcher<JobKey>.GroupEquals(JobKey.DefaultGroup));
-            ISet<TriggerKey> triggerKeys = await sched.GetTriggerKeys(GroupMatcher<TriggerKey>.GroupEquals(TriggerKey.DefaultGroup));
+            var jobKeys = await sched.GetJobKeys(GroupMatcher<JobKey>.GroupEquals(JobKey.DefaultGroup));
+            var triggerKeys = await sched.GetTriggerKeys(GroupMatcher<TriggerKey>.GroupEquals(TriggerKey.DefaultGroup));
 
             Assert.AreEqual(1, jobKeys.Count, "Number of jobs expected in default group was 1 ");
             Assert.AreEqual(1, triggerKeys.Count, "Number of triggers expected in default group was 1 ");
@@ -174,7 +176,7 @@ namespace Quartz.Tests.Unit
             s = await sched.GetTriggerState(new TriggerKey("t2", "g1"));
             Assert.AreEqual(TriggerState.Normal, s, "State of trigger t2 expected to be NORMAL ");
 
-            ISet<string> pausedGroups = await sched.GetPausedTriggerGroups();
+            var pausedGroups = await sched.GetPausedTriggerGroups();
             Assert.AreEqual(0, pausedGroups.Count, "Size of paused trigger groups list expected to be 0 ");
 
             await sched.PauseTriggers(GroupMatcher<TriggerKey>.GroupEquals("g1"));

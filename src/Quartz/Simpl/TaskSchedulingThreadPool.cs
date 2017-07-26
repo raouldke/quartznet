@@ -22,23 +22,28 @@ namespace Quartz.Simpl
 
         // A list of running tasks (needed to optionally wait for executing tasks at shutdown)
         private readonly List<Task> runningTasks = new List<Task>();
+
         private readonly object taskListLock = new object();
 
         // The semaphore used to limit concurrency and integers representing maximim concurrent tasks
         private SemaphoreSlim concurrencySemaphore;
+
         private int maxConcurrency;
         protected const int DefaultMaxConcurrency = 10;
 
         private TaskScheduler scheduler;
-        private bool isInitialized = false;
+        private bool isInitialized;
 
         /// <summary>
         /// The TaskScheduler used to schedule tasks queued by users
         /// </summary>
         public TaskScheduler Scheduler
         {
-            get { return scheduler; }
-            set { if (!isInitialized) scheduler = value; }
+            get => scheduler;
+            set
+            {
+                if (!isInitialized) scheduler = value;
+            }
         }
 
         /// <summary>
@@ -60,8 +65,11 @@ namespace Quartz.Simpl
         /// </summary>
         public int MaxConcurency
         {
-            get { return maxConcurrency; }
-            set { if (!isInitialized) maxConcurrency = value; }
+            get => maxConcurrency;
+            set
+            {
+                if (!isInitialized) maxConcurrency = value;
+            }
         }
 
         /// <summary>
@@ -71,9 +79,16 @@ namespace Quartz.Simpl
         /// This alias for MaximumConcurrency is meant to make config files previously used with
         /// SimpleThreadPool or CLRThreadPool work more directly.
         /// </remarks>
-        public int ThreadCount {
-            get { return MaxConcurency; }
-            set { MaxConcurency = value; }
+        public int ThreadCount
+        {
+            get => MaxConcurency;
+            set => MaxConcurency = value;
+        }
+
+        // ReSharper disable once UnusedMember.Global
+        public string ThreadPriority
+        {
+            set => log.Warn("Thread priority is no longer supported for thread pool, ignoring");
         }
 
         /// <summary>
@@ -85,7 +100,9 @@ namespace Quartz.Simpl
 
         public virtual string InstanceName { get; set; }
 
-        public TaskSchedulingThreadPool() : this(DefaultMaxConcurrency) { }
+        public TaskSchedulingThreadPool() : this(DefaultMaxConcurrency)
+        {
+        }
 
         public TaskSchedulingThreadPool(int maxConcurrency)
         {

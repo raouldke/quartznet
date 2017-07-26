@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Quartz.Logging;
@@ -49,8 +50,8 @@ namespace Quartz.Listener
     /// <author>Marko Lahma (.NET)</author>
     public class JobChainingJobListener : JobListenerSupport
     {
-        private readonly string name;
         private readonly IDictionary<JobKey, JobKey> chainLinks;
+        private readonly ILog log;
 
         /// <summary>
         /// Construct an instance with the given name.
@@ -58,18 +59,12 @@ namespace Quartz.Listener
         /// <param name="name">The name of this instance.</param>
         public JobChainingJobListener(string name)
         {
-            if (name == null)
-            {
-                throw new ArgumentException("Listener name cannot be null!");
-            }
-            this.name = name;
+            Name = name ?? throw new ArgumentException("Listener name cannot be null!");
             chainLinks = new Dictionary<JobKey, JobKey>();
+            log = LogProvider.GetLogger(typeof(JobChainingJobListener));
         }
 
-        public override string Name
-        {
-            get { return name; }
-        }
+        public override string Name { get; }
 
         /// <summary>
         /// Add a chain mapping - when the Job identified by the first key completes
@@ -91,7 +86,10 @@ namespace Quartz.Listener
             chainLinks.Add(firstJob, secondJob);
         }
 
-        public override async Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException)
+        public override async Task JobWasExecuted(
+            IJobExecutionContext context, 
+            JobExecutionException jobException,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             JobKey sj;
             chainLinks.TryGetValue(context.JobDetail.Key, out sj);
@@ -101,15 +99,15 @@ namespace Quartz.Listener
                 return;
             }
 
-            Log.Info($"Job '{context.JobDetail.Key}' will now chain to Job '{sj}'");
+            log.Info($"Job '{context.JobDetail.Key}' will now chain to Job '{sj}'");
 
             try
             {
-                await context.Scheduler.TriggerJob(sj).ConfigureAwait(false);
+                await context.Scheduler.TriggerJob(sj, cancellationToken).ConfigureAwait(false);
             }
             catch (SchedulerException se)
             {
-                Log.ErrorException($"Error encountered during chaining to Job '{sj}'", se);
+                log.ErrorException($"Error encountered during chaining to Job '{sj}'", se);
             }
         }
     }

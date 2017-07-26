@@ -22,6 +22,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Quartz.Logging;
 using Quartz.Spi;
 
@@ -55,7 +56,7 @@ namespace Quartz.Simpl
         /// Gets the log.
         /// </summary>
         /// <value>The log.</value>
-        protected virtual ILog Log { get; }
+        private ILog Log { get; }
 
         /// <summary>
         /// Gets the size of the pool.

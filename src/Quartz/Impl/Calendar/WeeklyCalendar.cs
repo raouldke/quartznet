@@ -21,8 +21,6 @@
 
 using System;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Security;
 
 using Quartz.Util;
 
@@ -73,7 +71,9 @@ namespace Quartz.Impl.Calendar
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
-        protected WeeklyCalendar(SerializationInfo info, StreamingContext context) : base(info, context)
+        protected WeeklyCalendar(
+			System.Runtime.Serialization.SerializationInfo info, 
+			System.Runtime.Serialization.StreamingContext context) : base(info, context)
         {
             int version;
             try
@@ -97,8 +97,10 @@ namespace Quartz.Impl.Calendar
             }
         }
 
-        [SecurityCritical]
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        [System.Security.SecurityCritical]
+        public override void GetObjectData(
+            System.Runtime.Serialization.SerializationInfo info, 
+            System.Runtime.Serialization.StreamingContext context)
         {
             base.GetObjectData(info, context);
 
@@ -126,7 +128,7 @@ namespace Quartz.Impl.Calendar
         /// </summary>
         public virtual bool[] DaysExcluded
         {
-            get { return excludeDays; }
+            get => excludeDays;
 
             set
             {
@@ -223,7 +225,7 @@ namespace Quartz.Impl.Calendar
                 return false;
             }
 
-            timeUtc = TimeZoneUtil.ConvertTime(timeUtc, this.TimeZone); //apply the timezone
+            timeUtc = TimeZoneUtil.ConvertTime(timeUtc, TimeZone); //apply the timezone
             return !(IsDayExcluded(timeUtc.DayOfWeek));
         }
 
@@ -250,7 +252,7 @@ namespace Quartz.Impl.Calendar
             }
 
             //apply the timezone
-            timeUtc = TimeZoneUtil.ConvertTime(timeUtc, this.TimeZone);
+            timeUtc = TimeZoneUtil.ConvertTime(timeUtc, TimeZone);
 
             // Get timestamp for 00:00:00, in the correct timezone offset
             DateTimeOffset d = new DateTimeOffset(timeUtc.Date, timeUtc.Offset);
@@ -281,9 +283,9 @@ namespace Quartz.Impl.Calendar
         public override int GetHashCode()
         {
             int baseHash = 0;
-            if (GetBaseCalendar() != null)
+            if (CalendarBase != null)
             {
-                baseHash = GetBaseCalendar().GetHashCode();
+                baseHash = CalendarBase.GetHashCode();
             }
 
             return DaysExcluded.GetHashCode() + 5*baseHash;
@@ -295,7 +297,7 @@ namespace Quartz.Impl.Calendar
             {
                 return false;
             }
-            bool baseEqual = GetBaseCalendar() == null || GetBaseCalendar().Equals(obj.GetBaseCalendar());
+            bool baseEqual = CalendarBase == null || CalendarBase.Equals(obj.CalendarBase);
 
             return baseEqual && obj.DaysExcluded.SequenceEqual(DaysExcluded);
         }

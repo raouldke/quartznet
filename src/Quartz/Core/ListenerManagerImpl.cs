@@ -23,13 +23,12 @@ namespace Quartz.Core
 
         private readonly List<ISchedulerListener> schedulerListeners = new List<ISchedulerListener>(10);
 
-
         public void AddJobListener(IJobListener jobListener, params IMatcher<JobKey>[] matchers)
         {
             AddJobListener(jobListener, new List<IMatcher<JobKey>>(matchers));
         }
 
-        public void AddJobListener(IJobListener jobListener, IList<IMatcher<JobKey>> matchers)
+        public void AddJobListener(IJobListener jobListener, IReadOnlyCollection<IMatcher<JobKey>> matchers)
         {
             if (string.IsNullOrEmpty(jobListener.Name))
             {
@@ -54,7 +53,6 @@ namespace Quartz.Core
                 globalJobListenersMatchers[jobListener.Name] = matchersL;
             }
         }
-
 
         public bool AddJobListenerMatcher(string listenerName, IMatcher<JobKey> matcher)
         {
@@ -93,20 +91,16 @@ namespace Quartz.Core
             }
         }
 
-        public IList<IMatcher<JobKey>> GetJobListenerMatchers(string listenerName)
+        public IReadOnlyCollection<IMatcher<JobKey>> GetJobListenerMatchers(string listenerName)
         {
             lock (globalJobListeners)
             {
                 List<IMatcher<JobKey>> matchers = globalJobListenersMatchers.TryGetAndReturn(listenerName);
-                if (matchers == null)
-                {
-                    return null;
-                }
-                return matchers.AsReadOnly();
+                return matchers?.AsReadOnly();
             }
         }
 
-        public bool SetJobListenerMatchers(string listenerName, IList<IMatcher<JobKey>> matchers)
+        public bool SetJobListenerMatchers(string listenerName, IReadOnlyCollection<IMatcher<JobKey>> matchers)
         {
             if (matchers == null)
             {
@@ -125,7 +119,6 @@ namespace Quartz.Core
             }
         }
 
-
         public bool RemoveJobListener(string name)
         {
             lock (globalJobListeners)
@@ -139,7 +132,7 @@ namespace Quartz.Core
             }
         }
 
-        public IList<IJobListener> GetJobListeners()
+        public IReadOnlyCollection<IJobListener> GetJobListeners()
         {
             lock (globalJobListeners)
             {
@@ -160,7 +153,7 @@ namespace Quartz.Core
             AddTriggerListener(triggerListener, new List<IMatcher<TriggerKey>>(matchers));
         }
 
-        public void AddTriggerListener(ITriggerListener triggerListener, IList<IMatcher<TriggerKey>> matchers)
+        public void AddTriggerListener(ITriggerListener triggerListener, IReadOnlyCollection<IMatcher<TriggerKey>> matchers)
         {
             if (string.IsNullOrEmpty(triggerListener.Name))
             {
@@ -242,20 +235,16 @@ namespace Quartz.Core
             }
         }
 
-        public IList<IMatcher<TriggerKey>> GetTriggerListenerMatchers(string listenerName)
+        public IReadOnlyCollection<IMatcher<TriggerKey>> GetTriggerListenerMatchers(string listenerName)
         {
             lock (globalTriggerListeners)
             {
                 List<IMatcher<TriggerKey>> matchers = globalTriggerListenersMatchers.TryGetAndReturn(listenerName);
-                if (matchers == null)
-                {
-                    return null;
-                }
                 return matchers;
             }
         }
 
-        public bool SetTriggerListenerMatchers(string listenerName, IList<IMatcher<TriggerKey>> matchers)
+        public bool SetTriggerListenerMatchers(string listenerName, IReadOnlyCollection<IMatcher<TriggerKey>> matchers)
         {
             if (matchers == null)
             {
@@ -287,8 +276,7 @@ namespace Quartz.Core
             }
         }
 
-
-        public IList<ITriggerListener> GetTriggerListeners()
+        public IReadOnlyCollection<ITriggerListener> GetTriggerListeners()
         {
             lock (globalTriggerListeners)
             {
@@ -303,7 +291,6 @@ namespace Quartz.Core
                 return (ITriggerListener) globalTriggerListeners[name];
             }
         }
-
 
         public void AddSchedulerListener(ISchedulerListener schedulerListener)
         {
@@ -321,7 +308,7 @@ namespace Quartz.Core
             }
         }
 
-        public IList<ISchedulerListener> GetSchedulerListeners()
+        public IReadOnlyCollection<ISchedulerListener> GetSchedulerListeners()
         {
             lock (schedulerListeners)
             {

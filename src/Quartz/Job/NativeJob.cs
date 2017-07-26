@@ -22,6 +22,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Quartz.Logging;
 
 namespace Quartz.Job
@@ -46,8 +47,6 @@ namespace Quartz.Job
     /// <author>Marko Lahma (.NET)</author>
     public class NativeJob : IJob
 	{
-	    private readonly ILog log;
-
 		/// <summary>
 		/// Required parameter that specifies the name of the command (executable)
 		/// to be ran.
@@ -93,17 +92,14 @@ namespace Quartz.Job
         /// Gets the log.
         /// </summary>
         /// <value>The log.</value>
-	    protected ILog Log
-	    {
-	        get { return log; }
-	    }
+	    private ILog Log { get; }
 
-        /// <summary>
+		/// <summary>
         /// Initializes a new instance of the <see cref="NativeJob"/> class.
         /// </summary>
 	    public NativeJob()
 	    {
-            log = LogProvider.GetLogger(typeof(NativeJob));
+            Log = LogProvider.GetLogger(typeof(NativeJob));
 	    }
 
 		/// <summary>

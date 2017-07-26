@@ -8,7 +8,6 @@ using Quartz.Impl;
 using Quartz.Impl.AdoJobStore;
 using Quartz.Impl.AdoJobStore.Common;
 using Quartz.Listener;
-using Quartz.Logging;
 using Quartz.Simpl;
 using Quartz.Util;
 
@@ -23,7 +22,7 @@ namespace Quartz.Tests.Integration.Core
         public async Task TestRecoveringRepeatJobWhichIsFiredAndMisfiredAtTheSameTime()
         {
             const string DsName = "recoverJobsTest";
-            DBConnectionManager.Instance.AddConnectionProvider(DsName, new DbProvider("SqlServer-20", TestConstants.DefaultSqlServerConnectionString));
+            DBConnectionManager.Instance.AddConnectionProvider(DsName, new DbProvider(TestConstants.DefaultSqlServerProvider, TestConstants.SqlServerConnectionString));
 
             var jobStore = new JobStoreTX
             {
@@ -114,7 +113,9 @@ namespace Quartz.Tests.Integration.Core
 
             public override string Name => typeof(RecoverJobsTest).Name;
 
-            public override Task JobToBeExecuted(IJobExecutionContext context)
+            public override Task JobToBeExecuted(
+                IJobExecutionContext context,
+                CancellationToken cancellationToken = new CancellationToken())
             {
                 isJobRecovered.Set();
                 return TaskUtil.CompletedTask;

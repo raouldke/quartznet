@@ -19,27 +19,33 @@ namespace Quartz.Core
 
         public virtual int NumJobsFired => numJobsFired;
 
-        public virtual IReadOnlyList<IJobExecutionContext> ExecutingJobs => new List<IJobExecutionContext>(executingJobs.Values);
+        public virtual IReadOnlyCollection<IJobExecutionContext> ExecutingJobs => new List<IJobExecutionContext>(executingJobs.Values);
 
         private readonly ConcurrentDictionary<string, IJobExecutionContext> executingJobs = new ConcurrentDictionary<string, IJobExecutionContext>();
 
         private int numJobsFired;
 
-        public virtual Task JobToBeExecuted(IJobExecutionContext context)
+        public virtual Task JobToBeExecuted(
+            IJobExecutionContext context,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             Interlocked.Increment(ref numJobsFired);
             executingJobs[((IOperableTrigger) context.Trigger).FireInstanceId] = context;
             return TaskUtil.CompletedTask;
         }
 
-        public virtual Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException)
+        public virtual Task JobWasExecuted(
+            IJobExecutionContext context,
+            JobExecutionException jobException,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
-            IJobExecutionContext temp;
-            executingJobs.TryRemove(((IOperableTrigger) context.Trigger).FireInstanceId, out temp);
+            executingJobs.TryRemove(((IOperableTrigger) context.Trigger).FireInstanceId, out _);
             return TaskUtil.CompletedTask;
         }
 
-        public virtual Task JobExecutionVetoed(IJobExecutionContext context)
+        public virtual Task JobExecutionVetoed(
+            IJobExecutionContext context,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             return TaskUtil.CompletedTask;
         }

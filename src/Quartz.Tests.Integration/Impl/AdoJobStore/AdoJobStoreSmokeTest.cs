@@ -6,8 +6,6 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Quartz.Logging;
-
 using NUnit.Framework;
 
 using Quartz.Impl;
@@ -35,9 +33,9 @@ namespace Quartz.Tests.Integration.Impl.AdoJobStore
         static AdoJobStoreSmokeTest()
         {
             dbConnectionStrings["Oracle"] = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=xe)));User Id=system;Password=oracle;";
-            dbConnectionStrings["SQLServer"] = "Server=(local);Database=quartz;User Id=quartznet;Password=quartznet;";
-            dbConnectionStrings["MySQL"] = "Server = localhost; Database = quartz; Uid = root; Pwd = Password12!";
-            dbConnectionStrings["PostgreSQL"] = "Server=127.0.0.1;Port=5432;Userid=postgres;Password=Password12!;Pooling=true;MinPoolSize=1;MaxPoolSize=20;Timeout=15;SslMode=Disable;Database=quartz";
+            dbConnectionStrings["SQLServer"] = TestConstants.SqlServerConnectionString;
+            dbConnectionStrings["MySQL"] = "Server = localhost; Database = quartznet; Uid = quartznet; Pwd = quartznet";
+            dbConnectionStrings["PostgreSQL"] = "Server=127.0.0.1;Port=5432;Userid=quartznet;Password=quartznet;Pooling=true;MinPoolSize=1;MaxPoolSize=20;Timeout=15;SslMode=Disable;Database=quartznet";
             dbConnectionStrings["SQLite"] = "Data Source=test.db;Version=3;";
             dbConnectionStrings["Firebird"] = "User=SYSDBA;Password=masterkey;Database=/quartz.fdb;DataSource=localhost;Port=3050;Dialect=3;Charset=NONE;Role=;Connection lifetime=15;Pooling=true;MinPoolSize=0;MaxPoolSize=50;Packet Size=8192;ServerType=0;";
         }
@@ -69,9 +67,10 @@ namespace Quartz.Tests.Integration.Impl.AdoJobStore
 
         [Test]
         [TestCaseSource(nameof(GetSerializerTypes))]
-        public Task TestPostgreSQL(string serializerType)
+        public Task TestPostgreSql(string serializerType)
         {
             NameValueCollection properties = new NameValueCollection();
+            properties["quartz.jobStore.driverDelegateType"] = "Quartz.Impl.AdoJobStore.PostgreSQLDelegate, Quartz";
             return RunAdoJobStoreTest("Npgsql", "PostgreSQL", serializerType, properties);
         }
 
@@ -378,12 +377,12 @@ namespace Quartz.Tests.Integration.Impl.AdoJobStore
                 .StartAt(now)
                 .Build();
 
-            var toSchedule = new Dictionary<IJobDetail, ISet<ITrigger>>();
-            toSchedule.Add(badJob, new HashSet<ITrigger>()
+            var toSchedule = new Dictionary<IJobDetail, IReadOnlyCollection<ITrigger>>();
+            toSchedule.Add(badJob, new HashSet<ITrigger>
             {
                 badTrigger
             });
-            toSchedule.Add(goodJob, new HashSet<ITrigger>()
+            toSchedule.Add(goodJob, new HashSet<ITrigger>
             {
                 goodTrigger
             });
@@ -412,7 +411,7 @@ namespace Quartz.Tests.Integration.Impl.AdoJobStore
             properties["quartz.jobStore.clustered"] = "false";
             properties["quartz.jobStore.driverDelegateType"] = "Quartz.Impl.AdoJobStore.SqlServerDelegate, Quartz";
 
-            properties["quartz.dataSource.default.connectionString"] = TestConstants.DefaultSqlServerConnectionString;
+            properties["quartz.dataSource.default.connectionString"] = TestConstants.SqlServerConnectionString;
             properties["quartz.dataSource.default.provider"] = TestConstants.DefaultSqlServerProvider;
 
             // First we must get a reference to a scheduler
@@ -441,7 +440,7 @@ namespace Quartz.Tests.Integration.Impl.AdoJobStore
             properties["quartz.jobStore.clustered"] = "false";
             properties["quartz.jobStore.driverDelegateType"] = "Quartz.Impl.AdoJobStore.SqlServerDelegate, Quartz";
 
-            properties["quartz.dataSource.default.connectionString"] = TestConstants.DefaultSqlServerConnectionString;
+            properties["quartz.dataSource.default.connectionString"] = TestConstants.SqlServerConnectionString;
             properties["quartz.dataSource.default.provider"] = TestConstants.DefaultSqlServerProvider;
 
             // First we must get a reference to a scheduler

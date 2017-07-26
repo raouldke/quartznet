@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Quartz.Listener
@@ -53,11 +54,7 @@ namespace Quartz.Listener
         /// <param name="name">the name of this instance</param>
         public BroadcastJobListener(string name)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name), "Listener name cannot be null!");
-            }
-            Name = name;
+            Name = name ?? throw new ArgumentNullException(nameof(name), "Listener name cannot be null!");
             listeners = new List<IJobListener>();
         }
 
@@ -98,19 +95,26 @@ namespace Quartz.Listener
 
         public IReadOnlyList<IJobListener> Listeners => listeners;
 
-        public Task JobToBeExecuted(IJobExecutionContext context)
+        public Task JobToBeExecuted(
+            IJobExecutionContext context, 
+            CancellationToken cancellationToken = default(CancellationToken))
         {
-            return Task.WhenAll(listeners.Select(l => l.JobToBeExecuted(context)));
+            return Task.WhenAll(listeners.Select(l => l.JobToBeExecuted(context, cancellationToken)));
         }
 
-        public Task JobExecutionVetoed(IJobExecutionContext context)
+        public Task JobExecutionVetoed(
+            IJobExecutionContext context,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
-            return Task.WhenAll(listeners.Select(l => l.JobExecutionVetoed(context)));
+            return Task.WhenAll(listeners.Select(l => l.JobExecutionVetoed(context, cancellationToken)));
         }
 
-        public Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException)
+        public Task JobWasExecuted(
+            IJobExecutionContext context, 
+            JobExecutionException jobException,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
-            return Task.WhenAll(listeners.Select(l => l.JobWasExecuted(context, jobException)));
+            return Task.WhenAll(listeners.Select(l => l.JobWasExecuted(context, jobException, cancellationToken)));
         }
     }
 }

@@ -23,7 +23,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Runtime.Serialization;
 
 using Quartz.Util;
 
@@ -106,7 +105,9 @@ namespace Quartz
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
-        protected JobDataMap(SerializationInfo info, StreamingContext context) : base(info, context)
+        protected JobDataMap(
+            System.Runtime.Serialization.SerializationInfo info, 
+            System.Runtime.Serialization.StreamingContext context) : base(info, context)
         {
         }
 #endif // BINARY_SERIALIZATION
@@ -118,7 +119,7 @@ namespace Quartz
         public virtual void PutAsString(string key, bool value)
         {
             string strValue = value.ToString();
-            base.Put(key, strValue);
+            Put(key, strValue);
         }
 
 
@@ -129,7 +130,7 @@ namespace Quartz
         public virtual void PutAsString(string key, char value)
         {
             string strValue = value.ToString();
-            base.Put(key, strValue);
+            Put(key, strValue);
         }
 
         /// <summary>
@@ -139,7 +140,7 @@ namespace Quartz
         public virtual void PutAsString(string key, double value)
         {
             string strValue = value.ToString(CultureInfo.InvariantCulture);
-            base.Put(key, strValue);
+            Put(key, strValue);
         }
 
 
@@ -150,7 +151,7 @@ namespace Quartz
         public virtual void PutAsString(string key, float value)
         {
             string strValue = value.ToString(CultureInfo.InvariantCulture);
-            base.Put(key, strValue);
+            Put(key, strValue);
         }
 
 
@@ -161,7 +162,7 @@ namespace Quartz
         public virtual void PutAsString(string key, int value)
         {
             string strValue = value.ToString(CultureInfo.InvariantCulture);
-            base.Put(key, strValue);
+            Put(key, strValue);
         }
 
 
@@ -172,7 +173,7 @@ namespace Quartz
         public virtual void PutAsString(string key, long value)
         {
             string strValue = value.ToString(CultureInfo.InvariantCulture);
-            base.Put(key, strValue);
+            Put(key, strValue);
         }
 
         /// <summary>
@@ -182,7 +183,7 @@ namespace Quartz
         public virtual void PutAsString(string key, DateTime value)
         {
             string strValue = value.ToString(CultureInfo.InvariantCulture);
-            base.Put(key, strValue);
+            Put(key, strValue);
         }
 
         /// <summary>
@@ -192,7 +193,7 @@ namespace Quartz
         public virtual void PutAsString(string key, DateTimeOffset value)
         {
             string strValue = value.ToString(CultureInfo.InvariantCulture);
-            base.Put(key, strValue);
+            Put(key, strValue);
         }
 
         /// <summary>
@@ -202,7 +203,7 @@ namespace Quartz
         public virtual void PutAsString(string key, TimeSpan value)
         {
             string strValue = value.ToString();
-            base.Put(key, strValue);
+            Put(key, strValue);
         }
 
         /// <summary>

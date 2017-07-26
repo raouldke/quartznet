@@ -1,20 +1,20 @@
 #region License
 
-/* 
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved. 
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
- * use this file except in compliance with the License. You may obtain a copy 
- * of the License at 
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations 
+/*
+ * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
  * under the License.
- * 
+ *
  */
 
 #endregion
@@ -37,7 +37,7 @@ namespace Quartz.Tests.Unit
     [TestFixture(typeof(JsonObjectSerializer))]
     public class CronExpressionTest : SerializationTestSupport
     {
-        private static readonly string[] versions = new[] {"0.6.0"};
+        private static readonly string[] versions = {"0.6.0"};
 
         private static readonly TimeZoneInfo testTimeZone = TimeZoneInfo.Local;
 
@@ -69,7 +69,7 @@ namespace Quartz.Tests.Unit
         }
 
         /// <summary>
-        /// Verify that the target object and the object we just deserialized 
+        /// Verify that the target object and the object we just deserialized
         /// match.
         /// </summary>
         /// <param name="target"></param>
@@ -164,7 +164,7 @@ namespace Quartz.Tests.Unit
         {
             CronExpression cronExpression = new CronExpression("0 0 12 ? * MON-FRI");
             int[] arrJuneDaysThatShouldFire =
-                new int[] {1, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 18, 19, 20, 22, 21, 25, 26, 27, 28, 29};
+                {1, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 18, 19, 20, 22, 21, 25, 26, 27, 28, 29};
             List<int> juneDays = new List<int>(arrJuneDaysThatShouldFire);
 
             TestCorrectWeekFireDays(cronExpression, juneDays);
@@ -175,7 +175,7 @@ namespace Quartz.Tests.Unit
         {
             CronExpression cronExpression = new CronExpression("0 0 12 ? * FRI");
             int[] arrJuneDaysThatShouldFire =
-                new int[] {1, 8, 15, 22, 29};
+                {1, 8, 15, 22, 29};
             List<int> juneDays = new List<int>(arrJuneDaysThatShouldFire);
 
             TestCorrectWeekFireDays(cronExpression, juneDays);
@@ -185,7 +185,7 @@ namespace Quartz.Tests.Unit
         public void TestCronExpressionLastDayOfMonth()
         {
             CronExpression cronExpression = new CronExpression("0 0 12 L * ?");
-            int[] arrJuneDaysThatShouldFire = new int[] {30};
+            int[] arrJuneDaysThatShouldFire = {30};
             List<int> juneDays = new List<int>(arrJuneDaysThatShouldFire);
 
             TestCorrectWeekFireDays(cronExpression, juneDays);
@@ -676,6 +676,26 @@ namespace Quartz.Tests.Unit
             Assert.That(e.Message, Is.EqualTo("'/' must be followed by an integer."));
         }
 
+        [Test]
+        public void TestInvalidCharactersAfterAsterisk()
+        {
+            Assert.That(CronExpression.IsValidExpression("* * * ? * *A&/5:"), Is.False);
+            Assert.That(CronExpression.IsValidExpression("* * * ? *14 "), Is.False);
+            Assert.That(CronExpression.IsValidExpression(" * * ? *A&/5 *"), Is.False);
+            Assert.That(CronExpression.IsValidExpression("* * ? */5 *"), Is.False);
+            Assert.That(CronExpression.IsValidExpression("* * ? */52 *"), Is.False);
+
+            Assert.That(CronExpression.IsValidExpression("0 0/30 * * * ?"), Is.True);
+            Assert.That(CronExpression.IsValidExpression("0 0/1 * * * ?"), Is.True);
+            Assert.That(CronExpression.IsValidExpression("0 0/30 * * */2 ?"), Is.True);
+        }
+
+        [Test]
+        public void TestExtraCharactersAfterWeekDay()
+        {
+            Assert.That(CronExpression.IsValidExpression("0 0 15 ? * FRI*"), Is.False);
+        }
+
         private class SimpleCronExpression : CronExpression
         {
             public SimpleCronExpression(string cronExpression)
@@ -685,7 +705,7 @@ namespace Quartz.Tests.Unit
 
             public ISet<int> GetSetPublic(int constant)
             {
-                return base.GetSet(constant);
+                return GetSet(constant);
             }
         }
 

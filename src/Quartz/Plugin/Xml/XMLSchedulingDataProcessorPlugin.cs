@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Quartz.Impl;
@@ -59,8 +60,6 @@ namespace Quartz.Plugin.Xml
 
         private bool started;
 
-        private ITypeLoadHelper typeLoadHelper;
-
         private readonly HashSet<string> jobTriggerNameSet = new HashSet<string>();
 
         /// <summary>
@@ -75,13 +74,13 @@ namespace Quartz.Plugin.Xml
         /// Gets the log.
         /// </summary>
         /// <value>The log.</value>
-        protected ILog Log { get; }
+        private ILog Log { get; }
 
         public string Name { get; private set; }
 
         public IScheduler Scheduler { get; private set; }
 
-        protected ITypeLoadHelper TypeLoadHelper => typeLoadHelper;
+        protected ITypeLoadHelper TypeLoadHelper { get; private set; }
 
         /// <summary>
         /// Comma separated list of file names (with paths) to the XML files that should be read.
@@ -102,17 +101,21 @@ namespace Quartz.Plugin.Xml
         /// </summary>
         public bool FailOnFileNotFound { get; set; } = true;
 
-        public IEnumerable<KeyValuePair<string, JobFile>> JobFiles => jobFiles;
-
         /// <summary>
-        ///
+        /// Whether or not starting of the plugin should fail (throw an
+        /// exception) if the file cannot be handled. Default is <see langword="false" />.
         /// </summary>
-        /// <param name="fName"></param>
-        public virtual Task FileUpdated(string fName)
+        public virtual bool FailOnSchedulingError { get; set; }
+
+        public IReadOnlyCollection<KeyValuePair<string, JobFile>> JobFiles => jobFiles;
+
+        public virtual Task FileUpdated(
+            string fName,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             if (started)
             {
-                return ProcessFile(fName);
+                return ProcessFile(fName, cancellationToken);
             }
 
             return TaskUtil.CompletedTask;
@@ -122,15 +125,15 @@ namespace Quartz.Plugin.Xml
         /// Called during creation of the <see cref="IScheduler"/> in order to give
         /// the <see cref="ISchedulerPlugin"/> a chance to initialize.
         /// </summary>
-        /// <param name="pluginName">The name.</param>
-        /// <param name="scheduler">The scheduler.</param>
-        /// <throws>SchedulerConfigException </throws>
-        public virtual async Task Initialize(string pluginName, IScheduler scheduler)
+        public virtual async Task Initialize(
+            string pluginName,
+            IScheduler scheduler,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             Name = pluginName;
             Scheduler = scheduler;
-            typeLoadHelper = new SimpleTypeLoadHelper();
-            typeLoadHelper.Initialize();
+            TypeLoadHelper = new SimpleTypeLoadHelper();
+            TypeLoadHelper.Initialize();
 
             Log.Info("Registering Quartz Job Initialization Plug-in.");
 
@@ -140,7 +143,7 @@ namespace Quartz.Plugin.Xml
             foreach (string token in tokens)
             {
                 JobFile jobFile = new JobFile(this, token);
-                await jobFile.Initialize();
+                await jobFile.Initialize(cancellationToken);
                 jobFiles.Add(new KeyValuePair<string, JobFile>(jobFile.FilePath, jobFile));
             }
         }
@@ -150,7 +153,7 @@ namespace Quartz.Plugin.Xml
         /// to let the plug-in know it can now make calls into the scheduler if it
         /// needs to.
         /// </summary>
-        public virtual async Task Start()
+        public virtual async Task Start(CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
@@ -172,7 +175,7 @@ namespace Quartz.Plugin.Xml
                             TriggerKey tKey = new TriggerKey(jobTriggerName, JobInitializationPluginName);
 
                             // remove pre-existing job/trigger, if any
-                            await Scheduler.UnscheduleJob(tKey).ConfigureAwait(false);
+                            await Scheduler.UnscheduleJob(tKey, cancellationToken).ConfigureAwait(false);
 
                             // TODO: convert to use builder
                             var trig = new SimpleTriggerImpl();
@@ -192,16 +195,20 @@ namespace Quartz.Plugin.Xml
                             job.JobDataMap.Put(FileScanJob.FileName, jobFile.FilePath);
                             job.JobDataMap.Put(FileScanJob.FileScanListenerName, JobInitializationPluginName + '_' + Name);
 
-                            await Scheduler.ScheduleJob(job, trig).ConfigureAwait(false);
+                            await Scheduler.ScheduleJob(job, trig, cancellationToken).ConfigureAwait(false);
                             Log.DebugFormat("Scheduled file scan job for data file: {0}, at interval: {1}", jobFile.FileName, ScanInterval);
                         }
 
-                        await ProcessFile(jobFile).ConfigureAwait(false);
+                        await ProcessFile(jobFile, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
             catch (SchedulerException se)
             {
+                if (FailOnSchedulingError)
+                {
+                    throw;
+                }
                 Log.ErrorException("Error starting background-task for watching jobs file.", se);
             }
             finally
@@ -261,13 +268,13 @@ namespace Quartz.Plugin.Xml
         /// should free up all of it's resources because the scheduler is shutting
         /// down.
         /// </summary>
-        public virtual Task Shutdown()
+        public virtual Task Shutdown(CancellationToken cancellationToken = default(CancellationToken))
         {
             // nothing to do
             return TaskUtil.CompletedTask;
         }
 
-        private async Task ProcessFile(JobFile jobFile)
+        private async Task ProcessFile(JobFile jobFile, CancellationToken cancellationToken = default(CancellationToken))
         {
             if ((jobFile == null) || (jobFile.FileFound == false))
             {
@@ -284,15 +291,24 @@ namespace Quartz.Plugin.Xml
                 await processor.ProcessFileAndScheduleJobs(
                     jobFile.FileName,
                     jobFile.FileName, // systemId
-                    Scheduler).ConfigureAwait(false);
+                    Scheduler,
+                    cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                Log.ErrorException("Error scheduling jobs: " + e.Message, e);
+                var message = "Could not schedule jobs and triggers from file " + jobFile.FileName + ": " + e.Message;
+                if (FailOnSchedulingError)
+                {
+                    throw new SchedulerException(message, e);
+                }
+                else
+                {
+                    Log.ErrorException(message, e);
+                }
             }
         }
 
-        public Task ProcessFile(string filePath)
+        public Task ProcessFile(string filePath, CancellationToken cancellationToken = default(CancellationToken))
         {
             JobFile file = null;
             int idx = jobFiles.FindIndex(pair => pair.Key == filePath);
@@ -300,7 +316,7 @@ namespace Quartz.Plugin.Xml
             {
                 file = jobFiles[idx].Value;
             }
-           return ProcessFile(file);
+           return ProcessFile(file, cancellationToken);
         }
 
         /// <summary>
@@ -325,7 +341,7 @@ namespace Quartz.Plugin.Xml
 
             public string FileBasename { get; private set; }
 
-            public async Task Initialize()
+            public async Task Initialize(CancellationToken cancellationToken = default(CancellationToken))
             {
                 Stream f = null;
                 try
@@ -340,7 +356,7 @@ namespace Quartz.Plugin.Xml
                     FileInfo file = new FileInfo(fName); // files in filesystem
                     if (!file.Exists)
                     {
-                        Uri url = plugin.typeLoadHelper.GetResource(FileName);
+                        Uri url = plugin.TypeLoadHelper.GetResource(FileName);
                         if (url != null)
                         {
                             furl = WebUtility.UrlDecode(url.AbsolutePath);

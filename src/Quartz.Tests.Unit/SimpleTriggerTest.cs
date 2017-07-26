@@ -1,28 +1,28 @@
 #region License
 
-/* 
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved. 
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
- * use this file except in compliance with the License. You may obtain a copy 
- * of the License at 
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations 
+/*
+ * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
  * under the License.
- * 
+ *
  */
 
 #endregion
 
 using System;
-#if FAKE_IT_EASY
+
 using FakeItEasy;
-#endif
+
 using NUnit.Framework;
 
 using Quartz.Impl.Calendar;
@@ -33,7 +33,7 @@ using Quartz.Spi;
 namespace Quartz.Tests.Unit
 {
     /// <summary>
-    /// Unit test for SimpleTrigger serialization backwards compatibility. 
+    /// Unit test for SimpleTrigger serialization backwards compatibility.
     /// </summary>
 #if BINARY_SERIALIZATION
     [TestFixture(typeof(BinaryObjectSerializer))]
@@ -43,7 +43,7 @@ namespace Quartz.Tests.Unit
     {
         private static readonly string[] Versions = {"2.0"};
 
-        //private static TimeZone EST_TIME_ZONE = TimeZone.CurrentTimeZone; 
+        //private static TimeZone EST_TIME_ZONE = TimeZone.CurrentTimeZone;
         private static readonly DateTimeOffset StartTime;
         private static readonly DateTimeOffset EndTime;
 
@@ -91,7 +91,7 @@ namespace Quartz.Tests.Unit
         }
 
         /// <summary>
-        /// Verify that the target object and the object we just deserialized 
+        /// Verify that the target object and the object we just deserialized
         /// match.
         /// </summary>
         /// <param name="target"></param>
@@ -157,19 +157,19 @@ namespace Quartz.Tests.Unit
             SimpleTriggerImpl simpleTrigger = new SimpleTriggerImpl();
 
             // Make sure empty sub-objects are cloned okay
-            ITrigger clone = (ITrigger) simpleTrigger.Clone();
+            ITrigger clone = simpleTrigger.Clone();
             Assert.AreEqual(0, clone.JobDataMap.Count);
 
             // Make sure non-empty sub-objects are cloned okay
             simpleTrigger.JobDataMap.Put("K1", "V1");
             simpleTrigger.JobDataMap.Put("K2", "V2");
-            clone = (ITrigger) simpleTrigger.Clone();
+            clone = simpleTrigger.Clone();
             Assert.AreEqual(2, clone.JobDataMap.Count);
             Assert.AreEqual("V1", clone.JobDataMap.Get("K1"));
             Assert.AreEqual("V2", clone.JobDataMap.Get("K2"));
 
-            // Make sure sub-object collections have really been cloned by ensuring 
-            // their modification does not change the source Trigger 
+            // Make sure sub-object collections have really been cloned by ensuring
+            // their modification does not change the source Trigger
             clone.JobDataMap.Remove("K1");
             Assert.AreEqual(1, clone.JobDataMap.Count);
 
@@ -239,7 +239,6 @@ namespace Quartz.Tests.Unit
             }
         }
 
-#if FAKE_IT_EASY
         [Test]
         public void ShouldRemoveTriggerIfNotGoingToFireAgain()
         {
@@ -252,6 +251,5 @@ namespace Quartz.Tests.Unit
             var instruction = trigger.ExecutionComplete(A.Fake<IJobExecutionContext>(), new JobExecutionException());
             Assert.That(instruction, Is.EqualTo(SchedulerInstruction.DeleteTrigger));
         }
-#endif
     }
 }

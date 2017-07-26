@@ -92,10 +92,9 @@ namespace Quartz.Impl.Triggers
         private DateTimeOffset? previousFireTimeUtc; // Making a public property which called GetPreviousFireTime/SetPreviousFireTime would make the json attribute unnecessary
         private int repeatInterval = 1;
         private IntervalUnit repeatIntervalUnit = IntervalUnit.Minute;
-        private ISet<DayOfWeek> daysOfWeek;
+        private HashSet<DayOfWeek> daysOfWeek;
         private TimeOfDay startTimeOfDay;
         private TimeOfDay endTimeOfDay;
-        private int timesTriggered;
         private bool complete;
         private int repeatCount = RepeatIndefinitely;
         private TimeZoneInfo timeZone;
@@ -107,8 +106,8 @@ namespace Quartz.Impl.Triggers
         // More info: https://github.com/dotnet/corefx/issues/7757
         private string timeZoneInfoId
         {
-            get { return timeZone?.Id; }
-            set { timeZone = (value == null ? null : TimeZoneInfo.FindSystemTimeZoneById(value)); }
+            get => timeZone?.Id;
+            set => timeZone = (value == null ? null : TimeZoneInfo.FindSystemTimeZoneById(value));
         }
 
         /// <summary>
@@ -263,7 +262,7 @@ namespace Quartz.Impl.Triggers
         /// <see cref="DailyTimeIntervalTriggerImpl.FinalFireTimeUtc"/>
         public override DateTimeOffset? EndTimeUtc
         {
-            get { return endTimeUtc; }
+            get => endTimeUtc;
             set
             {
                 DateTimeOffset sTime = StartTimeUtc;
@@ -282,7 +281,7 @@ namespace Quartz.Impl.Triggers
         /// </summary>
         public int RepeatCount
         {
-            get { return repeatCount; }
+            get => repeatCount;
             set
             {
                 if (value < 0 && value != RepeatIndefinitely)
@@ -303,7 +302,7 @@ namespace Quartz.Impl.Triggers
         /// </remarks>
         public IntervalUnit RepeatIntervalUnit
         {
-            get { return repeatIntervalUnit; }
+            get => repeatIntervalUnit;
             set
             {
                 if (!((value == IntervalUnit.Second) ||
@@ -324,7 +323,7 @@ namespace Quartz.Impl.Triggers
         /// </summary>
         public int RepeatInterval
         {
-            get { return repeatInterval; }
+            get => repeatInterval;
             set
             {
                 if (value < 0)
@@ -340,11 +339,7 @@ namespace Quartz.Impl.Triggers
         /// the number of times the <see cref="IDailyTimeIntervalTrigger" /> has already
         /// fired.
         /// </summary>
-        public int TimesTriggered
-        {
-            get { return timesTriggered; }
-            set { timesTriggered = value; }
-        }
+        public int TimesTriggered { get; set; }
 
         public TimeZoneInfo TimeZone
         {
@@ -357,7 +352,7 @@ namespace Quartz.Impl.Triggers
                 return timeZone;
             }
 
-            set { timeZone = value; }
+            set => timeZone = value;
         }
 
         protected override bool ValidateMisfireInstruction(int misfireInstruction)
@@ -430,7 +425,7 @@ namespace Quartz.Impl.Triggers
         /// <see cref="AbstractTrigger.ExecutionComplete"/>
         public override void Triggered(ICalendar calendar)
         {
-            timesTriggered++;
+            TimesTriggered++;
             previousFireTimeUtc = nextFireTimeUtc;
             nextFireTimeUtc = GetFireTimeAfter(nextFireTimeUtc);
 
@@ -585,7 +580,7 @@ namespace Quartz.Impl.Triggers
         /// <param name="value"></param>
         public override void SetNextFireTimeUtc(DateTimeOffset? value)
         {
-            this.nextFireTimeUtc = value;
+            nextFireTimeUtc = value;
         }
 
         /// <summary>
@@ -616,7 +611,7 @@ namespace Quartz.Impl.Triggers
             }
 
             // Check repeatCount limit
-            if (repeatCount != RepeatIndefinitely && timesTriggered > repeatCount)
+            if (repeatCount != RepeatIndefinitely && TimesTriggered > repeatCount)
             {
                 return null;
             }
@@ -672,13 +667,13 @@ namespace Quartz.Impl.Triggers
             }
 
             // apply the proper offset for the end date
-            fireTimeEndDate = new DateTimeOffset(fireTimeEndDate.DateTime, TimeZoneUtil.GetUtcOffset(fireTimeEndDate.DateTime, this.TimeZone));
+            fireTimeEndDate = new DateTimeOffset(fireTimeEndDate.DateTime, TimeZoneUtil.GetUtcOffset(fireTimeEndDate.DateTime, TimeZone));
 
             // e. Check fireTime against startTime or startTimeOfDay to see which go first.
             DateTimeOffset fireTimeStartDate = startTimeOfDay.GetTimeOfDayForDate(fireTime).Value;
 
             // apply the proper offset for the start date
-            fireTimeStartDate = new DateTimeOffset(fireTimeStartDate.DateTime, TimeZoneUtil.GetUtcOffset(fireTimeStartDate.DateTime, this.TimeZone));
+            fireTimeStartDate = new DateTimeOffset(fireTimeStartDate.DateTime, TimeZoneUtil.GetUtcOffset(fireTimeStartDate.DateTime, TimeZone));
 
             if (fireTime < fireTimeStartDate)
             {
@@ -741,7 +736,7 @@ namespace Quartz.Impl.Triggers
 
             // apply proper offset
             var d = fireTime.Value;
-            d = new DateTimeOffset(d.DateTime, TimeZoneUtil.GetUtcOffset(d.DateTime, this.TimeZone));
+            d = new DateTimeOffset(d.DateTime, TimeZoneUtil.GetUtcOffset(d.DateTime, TimeZone));
 
             return d.ToUniversalTime();
         }
@@ -772,7 +767,7 @@ namespace Quartz.Impl.Triggers
             DayOfWeek dayOfWeekOfFireTime = fireTimeStartDateCal.DayOfWeek;
 
             // b2. We need to advance to another day if isAfterTimePassEndTimeOfDay is true, or dayOfWeek is not set.
-            ISet<DayOfWeek> daysOfWeek = DaysOfWeek;
+            var daysOfWeek = new HashSet<DayOfWeek>(DaysOfWeek);
             if (forceToAdvanceNextDay || !daysOfWeek.Contains(dayOfWeekOfFireTime))
             {
                 // Advance one day at a time until next available date.
@@ -816,13 +811,10 @@ namespace Quartz.Impl.Triggers
 
                 // We have an endTime, we still need to check to see if there is a endTimeOfDay if that's applicable.
                 DateTimeOffset? endTime = EndTimeUtc;
-                if (endTimeOfDay != null)
+                DateTimeOffset? endTimeOfDayDate = endTimeOfDay?.GetTimeOfDayForDate(endTime);
+                if (endTime < endTimeOfDayDate)
                 {
-                    DateTimeOffset? endTimeOfDayDate = endTimeOfDay.GetTimeOfDayForDate(endTime);
-                    if (endTime < endTimeOfDayDate)
-                    {
-                        endTime = endTimeOfDayDate;
-                    }
+                    endTime = endTimeOfDayDate;
                 }
                 return endTime;
             }
@@ -884,7 +876,7 @@ namespace Quartz.Impl.Triggers
         /// A Set containing the integers representing the days of the week, per the values 0-6 as defined by
         /// DayOfWees.Sunday - DayOfWeek.Saturday.
         /// </returns>
-        public ISet<DayOfWeek> DaysOfWeek
+        public IReadOnlyCollection<DayOfWeek> DaysOfWeek
         {
             get
             {
@@ -906,7 +898,7 @@ namespace Quartz.Impl.Triggers
                     throw new ArgumentException("DaysOfWeek set must contain at least one day.");
                 }
 
-                daysOfWeek = value;
+                daysOfWeek = new HashSet<DayOfWeek>(value);
             }
         }
 
@@ -931,7 +923,7 @@ namespace Quartz.Impl.Triggers
                 }
 
                 TimeOfDay eTime = EndTimeOfDay;
-                if (eTime != null && value != null && eTime.Before(value))
+                if (eTime != null && eTime.Before(value))
                 {
                     throw new ArgumentException(
                         "End time of day cannot be before start time of day");
@@ -946,7 +938,7 @@ namespace Quartz.Impl.Triggers
         /// </summary>
         public TimeOfDay EndTimeOfDay
         {
-            get { return endTimeOfDay; }
+            get => endTimeOfDay;
             set
             {
                 if (value == null)
@@ -955,7 +947,7 @@ namespace Quartz.Impl.Triggers
                 }
 
                 TimeOfDay sTime = StartTimeOfDay;
-                if (sTime != null && endTimeOfDay != null && endTimeOfDay.Before(value))
+                if (sTime != null && value.Before(sTime))
                 {
                     throw new ArgumentException("End time of day cannot be before start time of day");
                 }
@@ -996,18 +988,12 @@ namespace Quartz.Impl.Triggers
         /// This trigger has no additional properties besides what's defined in this class.
         /// </summary>
         /// <returns></returns>
-        public override bool HasAdditionalProperties
-        {
-            get { return false; }
-        }
+        public override bool HasAdditionalProperties => false;
 
         /// <summary>
         /// Tells whether this Trigger instance can handle events
         /// in millisecond precision.
         /// </summary>
-        public override bool HasMillisecondPrecision
-        {
-            get { return true; }
-        }
+        public override bool HasMillisecondPrecision => true;
     }
 }

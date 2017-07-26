@@ -1,6 +1,10 @@
 # By: Ron Cordell - roncordell
 #  I didn't see this anywhere, so I thought I'd post it here. This is the script from Quartz to create the tables in a MySQL database, modified to use INNODB instead of MYISAM.
 
+
+# make sure you have UTF-8 collaction for best .NET interoperability
+# CREATE DATABASE quartznet CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 DROP TABLE IF EXISTS QRTZ_FIRED_TRIGGERS;
 DROP TABLE IF EXISTS QRTZ_PAUSED_TRIGGER_GRPS;
 DROP TABLE IF EXISTS QRTZ_SCHEDULER_STATE;
@@ -88,6 +92,7 @@ CREATE TABLE QRTZ_SIMPROP_TRIGGERS
     DEC_PROP_2 NUMERIC(13,4) NULL,
     BOOL_PROP_1 BOOLEAN NULL,
     BOOL_PROP_2 BOOLEAN NULL,
+    TIME_ZONE_ID VARCHAR(80) NULL,
     PRIMARY KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP),
     FOREIGN KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP) 
     REFERENCES QRTZ_TRIGGERS(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP))

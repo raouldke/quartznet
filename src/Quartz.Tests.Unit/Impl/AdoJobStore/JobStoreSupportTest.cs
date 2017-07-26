@@ -1,7 +1,7 @@
-#if FAKE_IT_EASY
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 using FakeItEasy;
@@ -36,7 +36,8 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
                 A<string>.That.IsEqualTo(AdoConstants.StateWaiting),
                 A<DateTimeOffset>.Ignored,
                 A<int>.Ignored,
-                A<IList<TriggerKey>>.Ignored)).MustHaveHappened();
+                A<IList<TriggerKey>>.Ignored,
+                CancellationToken.None)).MustHaveHappened();
         }
 
         public class TestJobStoreSupport : JobStoreSupport
@@ -46,7 +47,10 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
                 return new ConnectionAndTransactionHolder(null, null);
             }
 
-            protected override Task<T> ExecuteInLock<T>(string lockName, Func<ConnectionAndTransactionHolder, Task<T>> txCallback)
+            protected override Task<T> ExecuteInLock<T>(
+                string lockName,
+                Func<ConnectionAndTransactionHolder, Task<T>> txCallback,
+                CancellationToken cancellationToken = default(CancellationToken))
             {
                 return Task.FromResult(default(T));
             }
@@ -66,5 +70,3 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
         }
     }
 }
-
-#endif

@@ -17,9 +17,9 @@
  */
 #endregion
 
+using System.Threading;
 using System.Threading.Tasks;
 
-using Quartz.Logging;
 using Quartz.Spi;
 using Quartz.Util;
 
@@ -44,20 +44,6 @@ namespace Quartz.Listener
     public abstract class JobListenerSupport : IJobListener
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="JobListenerSupport"/> class.
-        /// </summary>
-        protected JobListenerSupport()
-        {
-            Log = LogProvider.GetLogger(GetType());
-        }
-
-        /// <summary>
-        /// Get the <see cref="ILog" /> for this  class's category.  
-        /// This should be used by subclasses for logging.
-        /// </summary>
-        protected ILog Log { get; }
-
-        /// <summary>
         /// Get the name of the <see cref="IJobListener"/>.
         /// </summary>
         /// <value></value>
@@ -73,8 +59,11 @@ namespace Quartz.Listener
         /// </para>
         /// </summary>
         /// <param name="context"></param>
-        /// <seealso cref="JobExecutionVetoed(IJobExecutionContext)"/>
-        public virtual Task JobToBeExecuted(IJobExecutionContext context)
+        /// <param name="cancellationToken">The cancellation instruction.</param>
+        /// <seealso cref="JobExecutionVetoed"/>
+        public virtual Task JobToBeExecuted(
+            IJobExecutionContext context, 
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             return TaskUtil.CompletedTask;
         }
@@ -86,8 +75,11 @@ namespace Quartz.Listener
         /// execution.
         /// </summary>
         /// <param name="context"></param>
-        /// <seealso cref="JobToBeExecuted(IJobExecutionContext)"/>
-        public virtual Task JobExecutionVetoed(IJobExecutionContext context)
+        /// <param name="cancellationToken">The cancellation instruction.</param>
+        /// <seealso cref="JobToBeExecuted"/>
+        public virtual Task JobExecutionVetoed(
+            IJobExecutionContext context,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             return TaskUtil.CompletedTask;
         }
@@ -99,7 +91,11 @@ namespace Quartz.Listener
         /// </summary>
         /// <param name="context"></param>
         /// <param name="jobException"></param>
-        public virtual Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException)
+        /// <param name="cancellationToken">The cancellation instruction.</param>
+        public virtual Task JobWasExecuted(
+            IJobExecutionContext context,
+            JobExecutionException jobException,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             return TaskUtil.CompletedTask;
         }

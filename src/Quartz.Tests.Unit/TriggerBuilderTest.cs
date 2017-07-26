@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+
 using NUnit.Framework;
 
 namespace Quartz.Tests.Unit
@@ -83,6 +84,19 @@ namespace Quartz.Tests.Unit
                 .EndAt(DateTime.Now - TimeSpan.FromMilliseconds(100000000))
                 .WithCronSchedule("0 0 0 * * ?")
                 .Build();
+        }
+
+        [Test(Description = "https://github.com/quartznet/quartznet/pull/212")]
+        public void TestOverwriting()
+        {
+            var map = new JobDataMap();
+            map.Put("key", "overwritingvalue");
+            var trigger = TriggerBuilder.Create()
+                .UsingJobData("key", "originalvalue")
+                .UsingJobData(map)
+                .Build();
+
+            Assert.That(trigger.JobDataMap["key"], Is.EqualTo("overwritingvalue"));
         }
     }
 }

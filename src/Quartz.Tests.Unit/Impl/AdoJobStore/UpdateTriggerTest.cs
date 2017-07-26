@@ -5,15 +5,14 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
-#if FAKE_IT_EASY
+
 using FakeItEasy;
-#endif
+
 using NUnit.Framework;
 
 using Quartz.Impl.AdoJobStore;
 using Quartz.Impl.AdoJobStore.Common;
 using Quartz.Impl.Triggers;
-using Quartz.Logging;
 using Quartz.Simpl;
 
 namespace Quartz.Tests.Unit.Impl.AdoJobStore
@@ -42,29 +41,17 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
 
         public override string ConnectionString
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
-        public override string Database
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public override string Database => throw new NotImplementedException();
 
-        public override ConnectionState State
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public override ConnectionState State => throw new NotImplementedException();
 
-        public override string DataSource
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public override string DataSource => throw new NotImplementedException();
 
-        public override string ServerVersion
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public override string ServerVersion => throw new NotImplementedException();
 
         protected override DbCommand CreateDbCommand()
         {
@@ -75,7 +62,6 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
     [TestFixture]
     public class UpdateTriggerTest
     {
-#if FAKE_IT_EASY
         [Test]
         public async Task CronTrigger_AfterTriggerUpdate_Retains_Cron_Type()
         {
@@ -123,7 +109,6 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
             A.CallTo(() => metaData.GetParameterName(A<string>.Ignored)).ReturnsLazily(paramFunc);
 
             DelegateInitializationArgs args = new DelegateInitializationArgs();
-            args.Logger = LogProvider.GetLogger(GetType());
             args.TablePrefix = "QRTZ_";
             args.InstanceName = "TESTSCHED";
             args.InstanceId = "INSTANCE";
@@ -147,6 +132,5 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
             var resultDataParameters = dataParameterCollectionOutputs.Select(x => x as IDataParameter).Where(x => x.ParameterName == "triggerType").FirstOrDefault();
             Assert.AreEqual("CRON", resultDataParameters.Value);
         }
-#endif
     }
 }

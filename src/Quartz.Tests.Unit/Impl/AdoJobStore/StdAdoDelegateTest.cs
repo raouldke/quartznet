@@ -1,20 +1,20 @@
 #region License
 
-/* 
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved. 
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
- * use this file except in compliance with the License. You may obtain a copy 
- * of the License at 
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations 
+/*
+ * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
  * under the License.
- * 
+ *
  */
 
 #endregion
@@ -26,14 +26,13 @@ using System.Data.SqlClient;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-#if FAKE_IT_EASY
+
 using FakeItEasy;
-#endif
+
 using NUnit.Framework;
 
 using Quartz.Impl.AdoJobStore;
 using Quartz.Impl.AdoJobStore.Common;
-using Quartz.Logging;
 using Quartz.Simpl;
 using Quartz.Spi;
 
@@ -64,7 +63,6 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
 #endif
 
             var args = new DelegateInitializationArgs();
-            args.Logger = LogProvider.GetLogger(GetType());
             args.TablePrefix = "QRTZ_";
             args.InstanceName = "TESTSCHED";
             args.InstanceId = "INSTANCE";
@@ -113,7 +111,6 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
         {
         }
 
-#if FAKE_IT_EASY
         [Test]
         public async Task TestSelectBlobTriggerWithNoBlobContent()
         {
@@ -151,7 +148,6 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
                 TypeLoadHelper = new SimpleTypeLoadHelper(),
                 UseProperties = false,
                 InitString = "",
-                Logger = LogProvider.GetLogger(GetType()),
                 DbProvider = dbProvider
             };
             adoDelegate.Initialize(delegateInitializationArgs);
@@ -197,7 +193,7 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
 
             var persistenceDelegate = A.Fake<ITriggerPersistenceDelegate>();
             var exception = new InvalidOperationException();
-            A.CallTo(() => persistenceDelegate.LoadExtendedTriggerProperties(A<ConnectionAndTransactionHolder>.Ignored, A<TriggerKey>.Ignored)).Throws(exception);
+            A.CallTo(() => persistenceDelegate.LoadExtendedTriggerProperties(A<ConnectionAndTransactionHolder>.Ignored, A<TriggerKey>.Ignored, CancellationToken.None)).Throws(exception);
 
             StdAdoDelegate adoDelegate = new TestStdAdoDelegate(persistenceDelegate);
 
@@ -209,7 +205,6 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
                 TypeLoadHelper = new SimpleTypeLoadHelper(),
                 UseProperties = false,
                 InitString = "",
-                Logger = LogProvider.GetLogger(GetType()),
                 DbProvider = dbProvider
             };
             adoDelegate.Initialize(delegateInitializationArgs);
@@ -230,7 +225,7 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
                 Assert.That(e, Is.SameAs(exception));
             }
 
-            A.CallTo(() => persistenceDelegate.LoadExtendedTriggerProperties(A<ConnectionAndTransactionHolder>.Ignored, A<TriggerKey>.Ignored)).MustHaveHappened();
+            A.CallTo(() => persistenceDelegate.LoadExtendedTriggerProperties(A<ConnectionAndTransactionHolder>.Ignored, A<TriggerKey>.Ignored, CancellationToken.None)).MustHaveHappened();
         }
 
         [Test]
@@ -263,7 +258,7 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
 
             var persistenceDelegate = A.Fake<ITriggerPersistenceDelegate>();
             var exception = new InvalidOperationException();
-            A.CallTo(() => persistenceDelegate.LoadExtendedTriggerProperties(A<ConnectionAndTransactionHolder>.Ignored, A<TriggerKey>.Ignored)).Throws(exception);
+            A.CallTo(() => persistenceDelegate.LoadExtendedTriggerProperties(A<ConnectionAndTransactionHolder>.Ignored, A<TriggerKey>.Ignored, CancellationToken.None)).Throws(exception);
 
             StdAdoDelegate adoDelegate = new TestStdAdoDelegate(persistenceDelegate);
 
@@ -275,7 +270,6 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
                 TypeLoadHelper = new SimpleTypeLoadHelper(),
                 UseProperties = false,
                 InitString = "",
-                Logger = LogProvider.GetLogger(GetType()),
                 DbProvider = dbProvider
             };
             adoDelegate.Initialize(delegateInitializationArgs);
@@ -289,7 +283,7 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
             IOperableTrigger trigger = await adoDelegate.SelectTrigger(conn, new TriggerKey("test"));
             Assert.That(trigger, Is.Null);
 
-            A.CallTo(() => persistenceDelegate.LoadExtendedTriggerProperties(A<ConnectionAndTransactionHolder>.Ignored, A<TriggerKey>.Ignored)).MustHaveHappened();
+            A.CallTo(() => persistenceDelegate.LoadExtendedTriggerProperties(A<ConnectionAndTransactionHolder>.Ignored, A<TriggerKey>.Ignored, CancellationToken.None)).MustHaveHappened();
         }
 
         [Test]
@@ -305,13 +299,10 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
                 TypeLoadHelper = new SimpleTypeLoadHelper(),
                 UseProperties = false,
                 InitString = "triggerPersistenceDelegateClasses=" + typeof(TestTriggerPersistenceDelegate).AssemblyQualifiedName + ";" + typeof(TestTriggerPersistenceDelegate).AssemblyQualifiedName,
-                Logger = LogProvider.GetLogger(GetType()),
                 DbProvider = A.Fake<IDbProvider>()
             };
             adoDelegate.Initialize(delegateInitializationArgs);
         }
-
-#endif
 
         private class TestStdAdoDelegate : StdAdoDelegate
         {
@@ -384,31 +375,16 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
         {
         }
 
-        public override int Count
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public override int Count => throw new NotImplementedException();
 
-        public override object SyncRoot
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public override object SyncRoot => throw new NotImplementedException();
 
 #if !NETCORE
-        public override bool IsFixedSize
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public override bool IsFixedSize => throw new NotImplementedException();
 
-        public override bool IsReadOnly
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public override bool IsReadOnly => throw new NotImplementedException();
 
-        public override bool IsSynchronized
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public override bool IsSynchronized => throw new NotImplementedException();
 #endif
 
         public override int IndexOf(string parameterName)

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Threading;
 using System.Threading.Tasks;
 
 using NUnit.Framework;
 
 using Quartz.Impl;
-using Quartz.Logging;
 using Quartz.Simpl;
 using Quartz.Spi;
 
@@ -74,7 +74,6 @@ namespace Quartz.Tests.Integration.Core
     public class CollectDurationBetweenFireTimesJob : IJob
     {
         private static DateTime? lastFireTime;
-        private static readonly List<TimeSpan> durationBetweenFireTimes = new List<TimeSpan>();
         private static readonly ILog log = LogProvider.GetLogger(typeof (CollectDurationBetweenFireTimesJob));
 
         public Task Execute(IJobExecutionContext context)
@@ -83,14 +82,14 @@ namespace Quartz.Tests.Integration.Core
             log.Info("Fire time: " + now);
             if (lastFireTime != null)
             {
-                durationBetweenFireTimes.Add(now - lastFireTime.Value);
+                Durations.Add(now - lastFireTime.Value);
             }
 
             lastFireTime = now;
             return Task.FromResult(0);
         }
 
-        public static List<TimeSpan> Durations => durationBetweenFireTimes;
+        public static List<TimeSpan> Durations { get; } = new List<TimeSpan>();
     }
 
     /// <summary>
@@ -98,12 +97,16 @@ namespace Quartz.Tests.Integration.Core
     /// </summary>
     public class SlowRAMJobStore : RAMJobStore
     {
-        public override async Task<IReadOnlyList<IOperableTrigger>> AcquireNextTriggers(DateTimeOffset noLaterThan, int maxCount, TimeSpan timeWindow)
+        public override async Task<IReadOnlyCollection<IOperableTrigger>> AcquireNextTriggers(
+            DateTimeOffset noLaterThan, 
+            int maxCount, 
+            TimeSpan timeWindow,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
-            var nextTriggers = await base.AcquireNextTriggers(noLaterThan, maxCount, timeWindow);
+            var nextTriggers = await base.AcquireNextTriggers(noLaterThan, maxCount, timeWindow, cancellationToken);
 
             // Wait just a bit for hopefully having a context switch leading to the race condition
-            await Task.Delay(10);
+            await Task.Delay(10, cancellationToken);
 
             return nextTriggers;
         }
