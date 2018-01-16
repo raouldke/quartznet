@@ -1,6 +1,6 @@
 #region License
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -69,7 +69,6 @@ namespace Quartz.Impl
 	/// <author>James House</author>
     /// <author>Marko Lahma (.NET)</author>
     /// <seealso cref="IJobStore" />
-	/// <seealso cref="ThreadPool" />
 	public class DirectSchedulerFactory : ISchedulerFactory
 	{
 		public const string DefaultInstanceId = "SIMPLE_NON_CLUSTERED";
@@ -96,7 +95,7 @@ namespace Quartz.Impl
 		/// StdSchedulerFactory instance.).
 		/// </para>
 		/// </summary>
-		public virtual Task<IReadOnlyList<IScheduler>> GetAllSchedulers(CancellationToken cancellationToken = default(CancellationToken))
+		public virtual Task<IReadOnlyList<IScheduler>> GetAllSchedulers(CancellationToken cancellationToken = default)
 		{
 			return SchedulerRepository.Instance.LookupAll(cancellationToken);
 		}
@@ -350,7 +349,7 @@ namespace Quartz.Impl
 		/// <returns></returns>
 		/// <throws>  SchedulerException </throws>
 		public virtual Task<IScheduler> GetScheduler(
-			CancellationToken cancellationToken = default(CancellationToken))
+			CancellationToken cancellationToken = default)
 		{
 			if (!initialized)
 			{
@@ -367,7 +366,7 @@ namespace Quartz.Impl
 		/// </summary>
 		public virtual Task<IScheduler> GetScheduler(
 			string schedName,
-			CancellationToken cancellationToken = default(CancellationToken))
+			CancellationToken cancellationToken = default)
 		{
 			SchedulerRepository schedRep = SchedulerRepository.Instance;
 

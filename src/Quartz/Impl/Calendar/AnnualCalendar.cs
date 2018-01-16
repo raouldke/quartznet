@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 using Quartz.Util;
 
@@ -34,9 +35,7 @@ namespace Quartz.Impl.Calendar
     /// <seealso cref="BaseCalendar" />
     /// <author>Juergen Donnerstag</author>
     /// <author>Marko Lahma (.NET)</author>
-#if BINARY_SERIALIZATION
     [Serializable]
-#endif // BINARY_SERIALIZATION
     public class AnnualCalendar : BaseCalendar
     {
         private SortedSet<DateTime> excludeDays = new SortedSet<DateTime>();
@@ -59,17 +58,12 @@ namespace Quartz.Impl.Calendar
         {
         }
 
-#if BINARY_SERIALIZATION // NetCore versions of Quartz can't use old serialized data.
-        // Make sure that future calendar version changes are done in a DCS-friendly way (with [OnSerializing] and [OnDeserialized] methods).
-
         /// <summary>
         /// Serialization constructor.
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
-        protected AnnualCalendar(
-			System.Runtime.Serialization.SerializationInfo info,
-			System.Runtime.Serialization.StreamingContext context) : base(info, context)
+        protected AnnualCalendar(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             int version;
             try
@@ -121,25 +115,20 @@ namespace Quartz.Impl.Calendar
         }
 
         [System.Security.SecurityCritical]
-        public override void GetObjectData(
-            System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context)
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
 
             info.AddValue("version", 2);
             info.AddValue("excludeDays", excludeDays);
         }
-#endif // BINARY_SERIALIZATION
 
         /// <summary>
-        /// Get or the array which defines the exclude-value of each day of month.
-        /// Setting will redefine the array of days excluded. The array must of size greater or
-        /// equal 31.
+        /// Gets or sets the days to be excluded by this calendar.
         /// </summary>
         public virtual IReadOnlyCollection<DateTime> DaysExcluded
         {
-            get => new SortedSet<DateTime>(excludeDays);
+            get => new ReadOnlyCompatibleHashSet<DateTime>(excludeDays);
             set => excludeDays = value == null ? new SortedSet<DateTime>() : new SortedSet<DateTime>(value);
         }
 
@@ -230,7 +219,7 @@ namespace Quartz.Impl.Calendar
             //apply the timezone
             dateUtc = TimeZoneUtil.ConvertTime(dateUtc, TimeZone);
 
-            return !(IsDayExcluded(dateUtc));
+            return !IsDayExcluded(dateUtc);
         }
 
         /// <summary>
@@ -245,7 +234,7 @@ namespace Quartz.Impl.Calendar
         {
             // Call base calendar implementation first
             DateTimeOffset baseTime = base.GetNextIncludedTimeUtc(timeStampUtc);
-            if ((baseTime != DateTimeOffset.MinValue) && (baseTime > timeStampUtc))
+            if (baseTime != DateTimeOffset.MinValue && baseTime > timeStampUtc)
             {
                 timeStampUtc = baseTime;
             }
@@ -278,7 +267,7 @@ namespace Quartz.Impl.Calendar
                 baseHash = CalendarBase.GetHashCode();
             }
 
-            return excludeDays.GetHashCode() + 5*baseHash;
+            return excludeDays.GetHashCode() + 5 * baseHash;
         }
 
         public bool Equals(AnnualCalendar obj)
@@ -290,7 +279,7 @@ namespace Quartz.Impl.Calendar
 
             bool toReturn = CalendarBase == null || CalendarBase.Equals(obj.CalendarBase);
 
-            toReturn = toReturn && (DaysExcluded.Count == obj.DaysExcluded.Count);
+            toReturn = toReturn && DaysExcluded.Count == obj.DaysExcluded.Count;
             if (toReturn)
             {
                 foreach (DateTime date in DaysExcluded)

@@ -1,20 +1,20 @@
 #region License
 
-/* 
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved. 
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
- * use this file except in compliance with the License. You may obtain a copy 
- * of the License at 
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations 
+/*
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
  * under the License.
- * 
+ *
  */
 
 #endregion
@@ -28,9 +28,7 @@ namespace Quartz.Util
     /// </summary>
     /// <author>  <a href="mailto:jeff@binaryfeed.org">Jeffrey Wescott</a></author>
     /// <author>Marko Lahma (.NET)</author>
-#if BINARY_SERIALIZATION
     [Serializable]
-#endif // BINARY_SERIALIZATION
     public class Key<T> : IComparable<Key<T>>
     {
         /// <summary>
@@ -45,14 +43,14 @@ namespace Quartz.Util
         {
         }
 
-        /// <summary> 
+        /// <summary>
         /// Construct a new key with the given name and group.
         /// </summary>
         /// <param name="name">the name</param>
         /// <param name="group">the group</param>
         public Key(string name, string group)
         {
-            this.name = name ?? throw new ArgumentNullException("name", "Name cannot be null.");
+            this.name = name ?? throw new ArgumentNullException(nameof(name), "Name cannot be null.");
             if (group != null)
             {
                 this.group = group;
@@ -77,7 +75,7 @@ namespace Quartz.Util
         /// <summary> <para>
         /// Get the group portion of the key.
         /// </para>
-        /// 
+        ///
         /// </summary>
         /// <returns> the group
         /// </returns>
@@ -91,7 +89,7 @@ namespace Quartz.Util
         /// Return the string representation of the key. The format will be:
         /// &lt;group&gt;.&lt;name&gt;.
         /// </para>
-        /// 
+        ///
         /// </summary>
         /// <returns> the string representation of the key
         /// </returns>
@@ -105,8 +103,8 @@ namespace Quartz.Util
         {
             const int Prime = 31;
             int result = 1;
-            result = Prime*result + ((group == null) ? 0 : group.GetHashCode());
-            result = Prime*result + ((name == null) ? 0 : name.GetHashCode());
+            result = Prime*result + (@group == null ? 0 : group.GetHashCode());
+            result = Prime*result + (name == null ? 0 : name.GetHashCode());
             return result;
         }
 

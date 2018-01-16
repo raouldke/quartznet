@@ -48,7 +48,10 @@ namespace Quartz.Simpl
                 },
                 ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
                 TypeNameHandling = TypeNameHandling.All,
-                ContractResolver = new DefaultContractResolver(),
+                ContractResolver = new DefaultContractResolver
+                {
+                    IgnoreSerializableInterface = true
+                },
                 NullValueHandling = NullValueHandling.Ignore
             };
         }
@@ -244,7 +247,7 @@ namespace Quartz.Simpl
             protected override void PopulateFieldsToCalendarObject(AnnualCalendar value, JObject jObject)
             {
                 var excludedDates = jObject["ExcludedDays"].Values<DateTime>();
-                value.DaysExcluded = new SortedSet<DateTime>(excludedDates);
+                value.DaysExcluded = new ReadOnlyCompatibleHashSet<DateTime>(excludedDates);
             }
 
             protected override AnnualCalendar Create(JObject value)

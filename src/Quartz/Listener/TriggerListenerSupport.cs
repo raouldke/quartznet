@@ -1,7 +1,7 @@
 #region License
 
 /* 
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved. 
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
  * use this file except in compliance with the License. You may obtain a copy 
@@ -21,8 +21,6 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-
-using Quartz.Util;
 
 namespace Quartz.Listener
 {
@@ -55,7 +53,7 @@ namespace Quartz.Listener
         public virtual Task TriggerFired(
             ITrigger trigger,
             IJobExecutionContext context,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return TaskUtil.CompletedTask;
         }
@@ -63,14 +61,14 @@ namespace Quartz.Listener
         public virtual Task<bool> VetoJobExecution(
             ITrigger trigger,
             IJobExecutionContext context,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return Task.FromResult(false);
         }
 
         public virtual Task TriggerMisfired(
             ITrigger trigger,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return TaskUtil.CompletedTask;
         }
@@ -79,7 +77,7 @@ namespace Quartz.Listener
             ITrigger trigger, 
             IJobExecutionContext context, 
             SchedulerInstruction triggerInstructionCode,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return TaskUtil.CompletedTask;
         }

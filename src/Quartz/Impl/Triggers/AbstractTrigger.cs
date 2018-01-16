@@ -1,6 +1,6 @@
 #region License
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -52,9 +52,7 @@ namespace Quartz.Impl.Triggers
 	/// <author>James House</author>
 	/// <author>Sharada Jambula</author>
     /// <author>Marko Lahma (.NET)</author>
-#if BINARY_SERIALIZATION
     [Serializable]
-#endif // BINARY_SERIALIZATION
     public abstract class AbstractTrigger : IOperableTrigger, IEquatable<AbstractTrigger>
 	{
         private string name;
@@ -68,19 +66,16 @@ namespace Quartz.Impl.Triggers
         private DateTimeOffset? endTimeUtc;
         private DateTimeOffset startTimeUtc;
 
-#if BINARY_SERIALIZATION
         [NonSerialized] // we have the key in string fields
-#endif // BINARY_SERIALIZATION
         private TriggerKey key;
 
 		/// <summary>
         /// Get or sets the name of this <see cref="ITrigger" />.
 		/// </summary>
 		/// <exception cref="ArgumentException">If name is null or empty.</exception>
-		public virtual string Name
+		public string Name
 		{
 			get => name;
-
 		    set
 			{
 				if (value == null || value.Trim().Length == 0)
@@ -99,10 +94,9 @@ namespace Quartz.Impl.Triggers
 		/// <exception cref="ArgumentException">
 		/// if group is an empty string.
 		/// </exception>
-		public virtual string Group
+		public string Group
 		{
 			get => group;
-
 		    set
 			{
 				if (value != null && value.Trim().Length == 0)
@@ -126,10 +120,9 @@ namespace Quartz.Impl.Triggers
 		/// <exception cref="ArgumentException">
 		/// if jobName is null or empty.
 		/// </exception>
-		public virtual string JobName
+		public string JobName
 		{
 			get => jobName;
-
 		    set
 			{
 				if (value == null || value.Trim().Length == 0)
@@ -148,10 +141,9 @@ namespace Quartz.Impl.Triggers
 		/// <exception cref="ArgumentException"> ArgumentException
 		/// if group is an empty string.
 		/// </exception>
-		public virtual string JobGroup
+		public string JobGroup
 		{
 			get => jobGroup;
-
 		    set
 			{
 				if (value != null && value.Trim().Length == 0)
@@ -342,7 +334,7 @@ namespace Quartz.Impl.Triggers
 			{
                 DateTimeOffset sTime = StartTimeUtc;
 
-				if (value.HasValue && (sTime > value.Value))
+				if (value.HasValue && sTime > value.Value)
 				{
 					throw new ArgumentException("End time cannot be before start time");
 				}

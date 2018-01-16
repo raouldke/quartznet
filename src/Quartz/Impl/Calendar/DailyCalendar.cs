@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -21,6 +21,7 @@
 
 using System;
 using System.Globalization;
+using System.Runtime.Serialization;
 using System.Text;
 
 using Quartz.Util;
@@ -51,9 +52,7 @@ namespace Quartz.Impl.Calendar
     /// <author>Mike Funk</author>
     /// <author>Aaron Craven</author>
     /// <author>Marko Lahma (.NET)</author>
-#if BINARY_SERIALIZATION
     [Serializable]
-#endif // BINARY_SERIALIZATION
     public class DailyCalendar : BaseCalendar
     {
         private const string InvalidHourOfDay = "Invalid hour of day: ";
@@ -369,16 +368,12 @@ namespace Quartz.Impl.Calendar
                 rangeEndingTimeInMillis);
         }
 
-#if BINARY_SERIALIZATION // If this functionality is needed in the future with DCS serialization, it can ne added with [OnSerializing] and [OnDeserialized] methods
-
         /// <summary>
         /// Serialization constructor.
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
-        protected DailyCalendar(
-			System.Runtime.Serialization.SerializationInfo info,
-			System.Runtime.Serialization.StreamingContext context) : base(info, context)
+        protected DailyCalendar(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             int version;
             try
@@ -412,9 +407,7 @@ namespace Quartz.Impl.Calendar
         }
 
         [System.Security.SecurityCritical]
-        public override void GetObjectData(
-            System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context)
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
 
@@ -431,7 +424,6 @@ namespace Quartz.Impl.Calendar
 
             info.AddValue("invertTimeRange", InvertTimeRange);
         }
-#endif // BINARY_SERIALIZATION
 
         /// <summary>
         /// Determine whether the given time  is 'included' by the
@@ -441,8 +433,8 @@ namespace Quartz.Impl.Calendar
         /// <returns></returns>
         public override bool IsTimeIncluded(DateTimeOffset timeUtc)
         {
-            if ((CalendarBase != null) &&
-                (CalendarBase.IsTimeIncluded(timeUtc) == false))
+            if (CalendarBase != null
+                && CalendarBase.IsTimeIncluded(timeUtc) == false)
             {
                 return false;
             }
@@ -458,17 +450,17 @@ namespace Quartz.Impl.Calendar
                 GetTimeRangeEndingTimeUtc(timeUtc);
             if (!InvertTimeRange)
             {
-                if ((timeUtc > startOfDayInMillis &&
-                     timeUtc < timeRangeStartingTimeInMillis) ||
-                    (timeUtc > timeRangeEndingTimeInMillis &&
-                     timeUtc < endOfDayInMillis))
+                if (timeUtc > startOfDayInMillis &&
+                    timeUtc < timeRangeStartingTimeInMillis ||
+                    timeUtc > timeRangeEndingTimeInMillis &&
+                    timeUtc < endOfDayInMillis)
                 {
                     return true;
                 }
                 return false;
             }
-            if ((timeUtc >= timeRangeStartingTimeInMillis) &&
-                (timeUtc <= timeRangeEndingTimeInMillis))
+            if (timeUtc >= timeRangeStartingTimeInMillis &&
+                timeUtc <= timeRangeEndingTimeInMillis)
             {
                 return true;
             }
@@ -497,16 +489,16 @@ namespace Quartz.Impl.Calendar
                     // excluded by the baseCalendar, ask it the next time it
                     // includes and begin testing from there. Failing this, add one
                     // millisecond and continue testing.
-                    if ((nextIncludedTime >=
-                         GetTimeRangeStartingTimeUtc(nextIncludedTime)) &&
-                        (nextIncludedTime <=
-                         GetTimeRangeEndingTimeUtc(nextIncludedTime)))
+                    if (nextIncludedTime >=
+                        GetTimeRangeStartingTimeUtc(nextIncludedTime) &&
+                        nextIncludedTime <=
+                        GetTimeRangeEndingTimeUtc(nextIncludedTime))
                     {
                         nextIncludedTime =
                             GetTimeRangeEndingTimeUtc(nextIncludedTime).AddMilliseconds(OneMillis);
                     }
-                    else if ((CalendarBase != null) &&
-                             (!CalendarBase.IsTimeIncluded(nextIncludedTime)))
+                    else if (CalendarBase != null &&
+                             !CalendarBase.IsTimeIncluded(nextIncludedTime))
                     {
                         nextIncludedTime =
                             CalendarBase.GetNextIncludedTimeUtc(nextIncludedTime);
@@ -537,8 +529,8 @@ namespace Quartz.Impl.Calendar
                         nextIncludedTime = GetEndOfDay(nextIncludedTime);
                         nextIncludedTime = nextIncludedTime.AddMilliseconds(1);
                     }
-                    else if ((CalendarBase != null) &&
-                             (!CalendarBase.IsTimeIncluded(nextIncludedTime)))
+                    else if (CalendarBase != null &&
+                             !CalendarBase.IsTimeIncluded(nextIncludedTime))
                     {
                         nextIncludedTime =
                             CalendarBase.GetNextIncludedTimeUtc(nextIncludedTime);
@@ -651,7 +643,7 @@ namespace Quartz.Impl.Calendar
 
             var rangeStartingTime = rangeStartingTimeString.Split(Colon);
 
-            if ((rangeStartingTime.Length < 2) || (rangeStartingTime.Length > 4))
+            if (rangeStartingTime.Length < 2 || rangeStartingTime.Length > 4)
             {
                 throw new ArgumentException($"Invalid time string '{rangeStartingTimeString}'");
             }
@@ -678,7 +670,7 @@ namespace Quartz.Impl.Calendar
 
             var rangeEndingTime = rangeEndingTimeString.Split(Colon);
 
-            if ((rangeEndingTime.Length < 2) || (rangeEndingTime.Length > 4))
+            if (rangeEndingTime.Length < 2 || rangeEndingTime.Length > 4)
             {
                 throw new ArgumentException($"Invalid time string '{rangeEndingTimeString}'");
             }
@@ -869,15 +861,15 @@ namespace Quartz.Impl.Calendar
             }
             bool baseEqual = CalendarBase == null || CalendarBase.Equals(obj.CalendarBase);
 
-            return baseEqual && (InvertTimeRange == obj.InvertTimeRange) &&
-                   (rangeStartingHourOfDay == obj.rangeStartingHourOfDay) &&
-                   (rangeStartingMinute == obj.rangeStartingMinute) &&
-                   (rangeStartingSecond == obj.rangeStartingSecond) &&
-                   (rangeStartingMillis == obj.rangeStartingMillis) &&
-                   (rangeEndingHourOfDay == obj.rangeEndingHourOfDay) &&
-                   (rangeEndingMinute == obj.rangeEndingMinute) &&
-                   (rangeEndingSecond == obj.rangeEndingSecond) &&
-                   (rangeEndingMillis == obj.rangeEndingMillis);
+            return baseEqual && InvertTimeRange == obj.InvertTimeRange &&
+                   rangeStartingHourOfDay == obj.rangeStartingHourOfDay &&
+                   rangeStartingMinute == obj.rangeStartingMinute &&
+                   rangeStartingSecond == obj.rangeStartingSecond &&
+                   rangeStartingMillis == obj.rangeStartingMillis &&
+                   rangeEndingHourOfDay == obj.rangeEndingHourOfDay &&
+                   rangeEndingMinute == obj.rangeEndingMinute &&
+                   rangeEndingSecond == obj.rangeEndingSecond &&
+                   rangeEndingMillis == obj.rangeEndingMillis;
         }
 
         public override bool Equals(object obj)

@@ -101,10 +101,9 @@ namespace Quartz.Impl.AdoJobStore.Common
             dbMetadataLookup[dbProviderName] = metadata;
         }
 
-        protected virtual DbMetadata GetDbMetadata(string providerName)
+        private DbMetadata GetDbMetadata(string providerName)
         {
-            DbMetadata result;
-            if (!dbMetadataLookup.TryGetValue(providerName, out result))
+            if (!dbMetadataLookup.TryGetValue(providerName, out var result))
             {
                 foreach (var dbMetadataFactory in dbMetadataFactories)
                 {
@@ -115,7 +114,7 @@ namespace Quartz.Impl.AdoJobStore.Common
                         return result;
                     }
                 }
-                throw new ArgumentOutOfRangeException("providerName", "There is no metadata information for provider '" + providerName + "'");
+                throw new ArgumentOutOfRangeException(nameof(providerName), "There is no metadata information for provider '" + providerName + "'");
             }
 
             return result;

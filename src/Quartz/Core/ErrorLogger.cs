@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 
 using Quartz.Listener;
 using Quartz.Logging;
-using Quartz.Util;
 
 namespace Quartz.Core
 {
@@ -17,7 +16,7 @@ namespace Quartz.Core
         public override Task SchedulerError(
             string msg,
             SchedulerException cause,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             log.ErrorException(msg, cause);
             return TaskUtil.CompletedTask;

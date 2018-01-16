@@ -1,7 +1,7 @@
 #region License
 
 /* 
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved. 
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
  * use this file except in compliance with the License. You may obtain a copy 
@@ -62,7 +62,7 @@ namespace Quartz
         Task TriggerFired(
             ITrigger trigger, 
             IJobExecutionContext context,
-            CancellationToken cancellationToken = default(CancellationToken));
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Called by the <see cref="IScheduler"/> when a <see cref="ITrigger"/>
@@ -82,7 +82,7 @@ namespace Quartz
         Task<bool> VetoJobExecution(
             ITrigger trigger,
             IJobExecutionContext context,
-            CancellationToken cancellationToken = default(CancellationToken));
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Called by the <see cref="IScheduler" /> when a <see cref="ITrigger" />
@@ -98,7 +98,7 @@ namespace Quartz
         /// <param name="cancellationToken">The cancellation instruction.</param>
         Task TriggerMisfired(
             ITrigger trigger,
-            CancellationToken cancellationToken = default(CancellationToken));
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Called by the <see cref="IScheduler" /> when a <see cref="ITrigger" />
@@ -119,6 +119,6 @@ namespace Quartz
             ITrigger trigger, 
             IJobExecutionContext context, 
             SchedulerInstruction triggerInstructionCode,
-            CancellationToken cancellationToken = default(CancellationToken));
+            CancellationToken cancellationToken = default);
     }
 }

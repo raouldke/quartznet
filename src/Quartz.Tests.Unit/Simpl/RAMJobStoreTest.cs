@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -34,7 +34,6 @@ using Quartz.Impl.Triggers;
 using Quartz.Job;
 using Quartz.Simpl;
 using Quartz.Spi;
-using Quartz.Util;
 
 namespace Quartz.Tests.Unit.Simpl
 {
@@ -425,38 +424,38 @@ namespace Quartz.Tests.Unit.Simpl
 
             public Task NotifyTriggerListenersMisfired(
                 ITrigger trigger, 
-                CancellationToken cancellationToken = default(CancellationToken))
+                CancellationToken cancellationToken = default)
             {
                 fMisfireCount++;
-                return TaskUtil.CompletedTask;
+                return Task.FromResult(true);
             }
 
             public Task NotifySchedulerListenersFinalized(
                 ITrigger trigger, 
-                CancellationToken cancellationToken = default(CancellationToken))
+                CancellationToken cancellationToken = default)
             {
-                return TaskUtil.CompletedTask;
+                return Task.FromResult(true);
             }
 
             public void SignalSchedulingChange(
                 DateTimeOffset? candidateNewNextFireTimeUtc, 
-                CancellationToken cancellationToken = default(CancellationToken))
+                CancellationToken cancellationToken = default)
             {
             }
 
             public Task NotifySchedulerListenersError(
                 string message,
                 SchedulerException jpe, 
-                CancellationToken cancellationToken = default(CancellationToken))
+                CancellationToken cancellationToken = default)
             {
-                return TaskUtil.CompletedTask;
+                return Task.FromResult(true);
             }
 
             public Task NotifySchedulerListenersJobDeleted(
                 JobKey jobKey, 
-                CancellationToken cancellationToken = default(CancellationToken))
+                CancellationToken cancellationToken = default)
             {
-                return TaskUtil.CompletedTask;
+                return Task.FromResult(true);
             }
         }
     }

@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace Quartz.Impl.Calendar
@@ -43,9 +44,7 @@ namespace Quartz.Impl.Calendar
     /// </remarks>
     /// <author>Aaron Craven</author>
     /// <author>Marko Lahma (.NET)</author>
-#if BINARY_SERIALIZATION
     [Serializable]
-#endif // BINARY_SERIALIZATION
     public class CronCalendar : BaseCalendar
     {
         private CronExpression cronExpression;
@@ -93,16 +92,12 @@ namespace Quartz.Impl.Calendar
             cronExpression = new CronExpression(expression);
         }
 
-#if BINARY_SERIALIZATION // If this functionality is needed in the future with DCS serialization, it can ne added with [OnSerializing] and [OnDeserialized] methods
-
         /// <summary>
         /// Serialization constructor.
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
-        protected CronCalendar(
-			System.Runtime.Serialization.SerializationInfo info,
-			System.Runtime.Serialization.StreamingContext context) : base(info, context)
+        protected CronCalendar(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             int version;
             try
@@ -126,16 +121,13 @@ namespace Quartz.Impl.Calendar
         }
 
         [System.Security.SecurityCritical]
-        public override void GetObjectData(
-            System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context)
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
 
             info.AddValue("version", 1);
             info.AddValue("cronExpression", cronExpression);
         }
-#endif // BINARY_SERIALIZATION
 
         public override TimeZoneInfo TimeZone
         {
@@ -151,13 +143,13 @@ namespace Quartz.Impl.Calendar
         /// <returns>a boolean indicating whether the specified time is 'included' by the CronCalendar</returns>
         public override bool IsTimeIncluded(DateTimeOffset timeUtc)
         {
-            if ((CalendarBase != null) &&
-                (CalendarBase.IsTimeIncluded(timeUtc) == false))
+            if (CalendarBase != null &&
+                CalendarBase.IsTimeIncluded(timeUtc) == false)
             {
                 return false;
             }
 
-            return (!(cronExpression.IsSatisfiedBy(timeUtc)));
+            return !cronExpression.IsSatisfiedBy(timeUtc);
         }
 
         /// <summary>
@@ -183,8 +175,8 @@ namespace Quartz.Impl.Calendar
                 {
                     nextIncludedTime = cronExpression.GetNextValidTimeAfter(nextIncludedTime).Value;
                 }
-                else if ((CalendarBase != null) &&
-                         (!CalendarBase.IsTimeIncluded(nextIncludedTime)))
+                else if (CalendarBase != null &&
+                         !CalendarBase.IsTimeIncluded(nextIncludedTime))
                 {
                     nextIncludedTime =
                         CalendarBase.GetNextIncludedTimeUtc(nextIncludedTime);

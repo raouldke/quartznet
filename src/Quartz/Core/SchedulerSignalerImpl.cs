@@ -1,6 +1,6 @@
 #region License
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -54,7 +54,7 @@ namespace Quartz.Core
         /// <param name="cancellationToken">The cancellation instruction.</param>
         public virtual async Task NotifyTriggerListenersMisfired(
             ITrigger trigger,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             try
             {
@@ -75,7 +75,7 @@ namespace Quartz.Core
         /// <param name="cancellationToken">The cancellation instruction.</param>
         public Task NotifySchedulerListenersFinalized(
             ITrigger trigger,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return sched.NotifySchedulerListenersFinalized(trigger, cancellationToken);
         }
@@ -85,14 +85,14 @@ namespace Quartz.Core
         /// </summary>
         public void SignalSchedulingChange(
             DateTimeOffset? candidateNewNextFireTime,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             schedThread.SignalSchedulingChange(candidateNewNextFireTime);
         }
 
         public Task NotifySchedulerListenersJobDeleted(
             JobKey jobKey,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return sched.NotifySchedulerListenersJobDeleted(jobKey, cancellationToken);
         }
@@ -100,7 +100,7 @@ namespace Quartz.Core
         public Task NotifySchedulerListenersError(
             string message,
             SchedulerException jpe,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return sched.NotifySchedulerListenersError(message, jpe, cancellationToken);
         }

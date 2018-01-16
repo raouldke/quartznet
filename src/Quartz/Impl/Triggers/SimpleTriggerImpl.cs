@@ -1,6 +1,6 @@
 #region License
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -30,9 +30,7 @@ namespace Quartz.Impl.Triggers
     /// <author>James House</author>
     /// <author>Contributions by Lieven Govaerts of Ebitec Nv, Belgium.</author>
     /// <author>Marko Lahma (.NET)</author>
-#if BINARY_SERIALIZATION
     [Serializable]
-#endif // BINARY_SERIALIZATION
     public class SimpleTriggerImpl : AbstractTrigger, ISimpleTrigger
 	{
         /// <summary>
@@ -606,7 +604,7 @@ namespace Quartz.Impl.Triggers
 		/// </summary>
         public override DateTimeOffset? GetFireTimeAfter(DateTimeOffset? afterTimeUtc)
 		{
-			if ((timesTriggered > repeatCount) && (repeatCount != RepeatIndefinitely))
+			if (timesTriggered > repeatCount && repeatCount != RepeatIndefinitely)
 			{
 				return null;
 			}
@@ -623,7 +621,7 @@ namespace Quartz.Impl.Triggers
 
 			DateTimeOffset startMillis = StartTimeUtc;
 			DateTimeOffset afterMillis = afterTimeUtc.Value;
-			DateTimeOffset endMillis = !EndTimeUtc.HasValue ? DateTimeOffset.MaxValue : EndTimeUtc.Value;
+			DateTimeOffset endMillis = EndTimeUtc ?? DateTimeOffset.MaxValue;
 
 
 			if (endMillis <= afterMillis)
@@ -636,10 +634,10 @@ namespace Quartz.Impl.Triggers
 				return startMillis;
 			}
 
-			long numberOfTimesExecuted = (long) (((long) (afterMillis - startMillis).TotalMilliseconds / repeatInterval.TotalMilliseconds) + 1);
+			long numberOfTimesExecuted = (long) ((long) (afterMillis - startMillis).TotalMilliseconds / repeatInterval.TotalMilliseconds + 1);
 
-			if ((numberOfTimesExecuted > repeatCount) &&
-				(repeatCount != RepeatIndefinitely))
+			if (numberOfTimesExecuted > repeatCount &&
+				repeatCount != RepeatIndefinitely)
 			{
 				return null;
 			}

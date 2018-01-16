@@ -1,6 +1,6 @@
 #region License
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -19,7 +19,6 @@
 
 using System;
 using System.Text;
-using System.Threading;
 
 using Quartz.Spi;
 
@@ -31,9 +30,7 @@ namespace Quartz
     /// </summary>
     /// <author>James House</author>
     /// <author>Marko Lahma (.NET)</author>
-#if BINARY_SERIALIZATION
     [Serializable]
-#endif // BINARY_SERIALIZATION
     public class SchedulerMetaData
 	{
 	    /// <summary>
@@ -126,7 +123,7 @@ namespace Quartz
 		public virtual Type JobStoreType { get; }
 
 	    /// <summary>
-		/// Returns the type name of the <see cref="ThreadPool" /> instance that is
+		/// Returns the type name of the thread pool instance that is
 		/// being used by the <see cref="IScheduler" />.
 		/// </summary>
 		public virtual Type ThreadPoolType { get; }

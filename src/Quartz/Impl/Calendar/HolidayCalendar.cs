@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 using Quartz.Util;
 
@@ -39,9 +40,7 @@ namespace Quartz.Impl.Calendar
 	/// <author>Sharada Jambula</author>
 	/// <author>Juergen Donnerstag</author>
 	/// <author>Marko Lahma (.NET)</author>
-#if BINARY_SERIALIZATION
 	[Serializable]
-#endif // BINARY_SERIALIZATION
 	public class HolidayCalendar : BaseCalendar
 	{
 		/// <summary>
@@ -51,7 +50,7 @@ namespace Quartz.Impl.Calendar
 		/// </summary>
         public virtual IReadOnlyCollection<DateTime> ExcludedDates
 		{
-            get => new SortedSet<DateTime>(dates);
+            get => new ReadOnlyCompatibleHashSet<DateTime>(dates);
 			internal set => dates = new SortedSet<DateTime>(value);
 		}
 
@@ -74,16 +73,13 @@ namespace Quartz.Impl.Calendar
 			CalendarBase = baseCalendar;
 		}
 
-#if BINARY_SERIALIZATION // NetCore versions of Quartz can't use old serialized data.
         // Make sure that future calendar version changes are done in a DCS-friendly way (with [OnSerializing] and [OnDeserialized] methods).
         /// <summary>
         /// Serialization constructor.
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
-        protected HolidayCalendar(
-			System.Runtime.Serialization.SerializationInfo info,
-			System.Runtime.Serialization.StreamingContext context) : base(info, context)
+        protected HolidayCalendar(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             int version;
             try
@@ -109,16 +105,13 @@ namespace Quartz.Impl.Calendar
         }
 
         [System.Security.SecurityCritical]
-        public override void GetObjectData(
-            System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context)
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
 
             info.AddValue("version", 2);
             info.AddValue("dates", dates.ToArray());
         }
-#endif // BINARY_SERIALIZATION
 
 		/// <summary>
 		/// Determine whether the given time (in milliseconds) is 'included' by the
@@ -152,7 +145,7 @@ namespace Quartz.Impl.Calendar
 		{
 			// Call base calendar implementation first
             DateTimeOffset baseTime = base.GetNextIncludedTimeUtc(timeUtc);
-            if ((timeUtc != DateTimeOffset.MinValue) && (baseTime > timeUtc))
+            if (timeUtc != DateTimeOffset.MinValue && baseTime > timeUtc)
 			{
 				timeUtc = baseTime;
 			}

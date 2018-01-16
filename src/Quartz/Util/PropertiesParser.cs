@@ -1,6 +1,6 @@
 #region License
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -560,7 +560,7 @@ namespace Quartz.Util
         /// </summary>
         /// <param name="prefix">The prefix.</param>
         /// <returns></returns>
-        public virtual IList<string> GetPropertyGroups(string prefix)
+        public virtual IReadOnlyList<string> GetPropertyGroups(string prefix)
 		{
             var groups = new HashSet<string>();
 
@@ -573,7 +573,7 @@ namespace Quartz.Util
 			{
 				if (key.StartsWith(prefix))
 				{
-					string groupName = key.Substring(prefix.Length, (key.IndexOf('.', prefix.Length)) - (prefix.Length));
+					string groupName = key.Substring(prefix.Length, key.IndexOf('.', prefix.Length) - prefix.Length);
 					groups.Add(groupName);
 				}
 			}
@@ -626,7 +626,7 @@ namespace Quartz.Util
                     bool exclude = false;
                     if (excludedPrefixes != null)
                     {
-                        for (int i = 0; (i < excludedPrefixes.Length) && (exclude == false); i++)
+                        for (int i = 0; i < excludedPrefixes.Length && exclude == false; i++)
                         {
                             exclude = key.StartsWith(excludedPrefixes[i]);
                         }

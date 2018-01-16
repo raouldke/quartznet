@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -24,6 +24,7 @@ using System.Collections.Specialized;
 using System.Threading.Tasks;
 
 using Quartz.Impl;
+using Quartz.Logging;
 
 namespace Quartz.Examples.Example10
 {
@@ -42,8 +43,8 @@ namespace Quartz.Examples.Example10
             // and makes it watch for changes every two minutes (120 seconds)
             var properties = new NameValueCollection
             {
-                ["quartz.plugin.triggHistory.type"] = "Quartz.Plugin.History.LoggingJobHistoryPlugin",
-                ["quartz.plugin.jobInitializer.type"] = "Quartz.Plugin.Xml.XMLSchedulingDataProcessorPlugin",
+                ["quartz.plugin.triggHistory.type"] = "Quartz.Plugin.History.LoggingJobHistoryPlugin, Quartz.Plugins",
+                ["quartz.plugin.jobInitializer.type"] = "Quartz.Plugin.Xml.XMLSchedulingDataProcessorPlugin, Quartz.Plugins",
                 ["quartz.plugin.jobInitializer.fileNames"] = "quartz_jobs.xml",
                 ["quartz.plugin.jobInitializer.failOnFileNotFound"] = "true",
                 ["quartz.plugin.jobInitializer.scanInterval"] = "120"

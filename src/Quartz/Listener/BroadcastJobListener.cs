@@ -1,7 +1,7 @@
 #region License
 
 /* 
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved. 
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
  * use this file except in compliance with the License. You may obtain a copy 
@@ -97,14 +97,14 @@ namespace Quartz.Listener
 
         public Task JobToBeExecuted(
             IJobExecutionContext context, 
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return Task.WhenAll(listeners.Select(l => l.JobToBeExecuted(context, cancellationToken)));
         }
 
         public Task JobExecutionVetoed(
             IJobExecutionContext context,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return Task.WhenAll(listeners.Select(l => l.JobExecutionVetoed(context, cancellationToken)));
         }
@@ -112,7 +112,7 @@ namespace Quartz.Listener
         public Task JobWasExecuted(
             IJobExecutionContext context, 
             JobExecutionException jobException,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return Task.WhenAll(listeners.Select(l => l.JobWasExecuted(context, jobException, cancellationToken)));
         }

@@ -1,7 +1,7 @@
 ﻿#region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -116,7 +115,7 @@ namespace Quartz.Impl.AdoJobStore
 
             if (daysOfWeekStr != null)
             {
-                HashSet<DayOfWeek> daysOfWeek = new HashSet<DayOfWeek>();
+                var daysOfWeek = new ReadOnlyCompatibleHashSet<DayOfWeek>();
                 string[] nums = daysOfWeekStr.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
                 if (nums.Length > 0)
                 {

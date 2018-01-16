@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -27,7 +27,6 @@ using Quartz.Impl;
 using Quartz.Listener;
 using Quartz.Logging;
 using Quartz.Spi;
-using Quartz.Util;
 
 namespace Quartz.Core
 {
@@ -40,7 +39,7 @@ namespace Quartz.Core
     /// <para>
     /// A <see cref="JobRunShell" /> instance is created by a <see cref="IJobRunShellFactory" />
     /// on behalf of the <see cref="QuartzSchedulerThread" /> which then runs the
-    /// shell in a thread from the configured <see cref="ThreadPool" /> when the
+    /// shell in a thread from the configured thread pool when the
     /// scheduler determines that a <see cref="IJob" /> has been triggered.
     /// </para>
     /// </summary>
@@ -72,7 +71,7 @@ namespace Quartz.Core
             log = LogProvider.GetLogger(GetType());
         }
 
-        public override Task SchedulerShuttingdown(CancellationToken cancellationToken = default(CancellationToken))
+        public override Task SchedulerShuttingdown(CancellationToken cancellationToken = default)
         {
             RequestShutdown();
             return TaskUtil.CompletedTask;
@@ -85,7 +84,7 @@ namespace Quartz.Core
         /// <param name="cancellationToken">The cancellation instruction.</param>
         public virtual async Task Initialize(
             QuartzScheduler sched,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             qs = sched;
 
@@ -123,7 +122,7 @@ namespace Quartz.Core
         /// run method to be called in that separately executing thread.
         /// </summary>
         /// <param name="cancellationToken">The cancellation instruction.</param>
-        public virtual async Task Run(CancellationToken cancellationToken = default(CancellationToken))
+        public virtual async Task Run(CancellationToken cancellationToken = default)
         {
             qs.AddInternalSchedulerListener(this);
 
@@ -315,7 +314,7 @@ namespace Quartz.Core
 
         private async Task<bool> NotifyListenersBeginning(
             IJobExecutionContext ctx,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             bool vetoed;
 
@@ -365,7 +364,7 @@ namespace Quartz.Core
         private async Task<bool> NotifyJobListenersComplete(
             IJobExecutionContext ctx,
             JobExecutionException jobExEx,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             try
             {
@@ -385,7 +384,7 @@ namespace Quartz.Core
         private async Task<bool> NotifyTriggerListenersComplete(
             IJobExecutionContext ctx,
             SchedulerInstruction instCode,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             try
             {
@@ -407,9 +406,7 @@ namespace Quartz.Core
             return true;
         }
 
-#if BINARY_SERIALIZATION
         [Serializable]
-#endif // BINARY_SERIALIZATION
         internal class VetoedException : Exception
         {
             public VetoedException(JobRunShell shell)

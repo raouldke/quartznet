@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -30,9 +30,7 @@ namespace Quartz.Impl.Matchers
     /// </summary>
     /// <author>James House</author>
     /// <author>Marko Lahma (.NET)</author>
-#if BINARY_SERIALIZATION
     [Serializable]
-#endif // BINARY_SERIALIZATION
     public class AndMatcher<TKey> : IMatcher<TKey> where TKey : Key<TKey>
     {
         // ReSharper disable once UnusedMember.Local
@@ -75,8 +73,8 @@ namespace Quartz.Impl.Matchers
         {
             const int Prime = 31;
             int result = 1;
-            result = Prime*result + ((LeftOperand == null) ? 0 : LeftOperand.GetHashCode());
-            result = Prime*result + ((RightOperand == null) ? 0 : RightOperand.GetHashCode());
+            result = Prime*result + (LeftOperand == null ? 0 : LeftOperand.GetHashCode());
+            result = Prime*result + (RightOperand == null ? 0 : RightOperand.GetHashCode());
             return result;
         }
 

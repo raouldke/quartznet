@@ -86,7 +86,7 @@ namespace Quartz.Tests.Integration.Core
             }
 
             lastFireTime = now;
-            return Task.FromResult(0);
+            return TaskUtil.CompletedTask;
         }
 
         public static List<TimeSpan> Durations { get; } = new List<TimeSpan>();
@@ -101,7 +101,7 @@ namespace Quartz.Tests.Integration.Core
             DateTimeOffset noLaterThan, 
             int maxCount, 
             TimeSpan timeWindow,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             var nextTriggers = await base.AcquireNextTriggers(noLaterThan, maxCount, timeWindow, cancellationToken);
 

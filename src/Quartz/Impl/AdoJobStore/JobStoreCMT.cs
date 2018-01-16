@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -27,7 +27,6 @@ using System.Threading.Tasks;
 
 using Quartz.Logging;
 using Quartz.Spi;
-using Quartz.Util;
 
 namespace Quartz.Impl.AdoJobStore
 {
@@ -58,7 +57,7 @@ namespace Quartz.Impl.AdoJobStore
         public override Task Initialize(
             ITypeLoadHelper loadHelper, 
             ISchedulerSignaler signaler,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             if (LockHandler == null)
             {
@@ -78,7 +77,7 @@ namespace Quartz.Impl.AdoJobStore
         /// it should free up all of it's resources because the scheduler is
         /// shutting down.
         /// </summary>
-        public override async Task Shutdown(CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task Shutdown(CancellationToken cancellationToken = default)
         {
             await base.Shutdown(cancellationToken).ConfigureAwait(false);
 
@@ -147,7 +146,7 @@ namespace Quartz.Impl.AdoJobStore
         protected override async Task<T> ExecuteInLock<T>(
             string lockName,
             Func<ConnectionAndTransactionHolder, Task<T>> txCallback,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             bool transOwner = false;
             ConnectionAndTransactionHolder conn = null;

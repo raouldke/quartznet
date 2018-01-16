@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -23,6 +23,7 @@ using System;
 using System.Threading.Tasks;
 
 using Quartz.Impl;
+using Quartz.Logging;
 
 namespace Quartz.Examples.Example11
 {
@@ -63,7 +64,7 @@ namespace Quartz.Examples.Example11
 
                 ITrigger trigger = TriggerBuilder.Create()
                     .WithIdentity("trigger_" + count, "group_1")
-                    .StartAt(DateBuilder.FutureDate((10000 + (count*100)), IntervalUnit.Millisecond)) // space fire times a small bit
+                    .StartAt(DateBuilder.FutureDate(10000 + count*100, IntervalUnit.Millisecond)) // space fire times a small bit
                     .Build();
 
                 await sched.ScheduleJob(job, trigger);

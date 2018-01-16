@@ -1,7 +1,7 @@
 #region License
 
 /* 
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved. 
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
  * use this file except in compliance with the License. You may obtain a copy 
@@ -51,11 +51,11 @@ namespace Quartz.Simpl
         /// <returns> The clusterwide unique instance id.
         /// </returns>
         public abstract Task<string> GenerateInstanceId(
-            CancellationToken cancellationToken = default(CancellationToken));
+            CancellationToken cancellationToken = default);
 
         protected async Task<string> GetHostName(
             int maxLength, 
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             try
             {
@@ -76,7 +76,7 @@ namespace Quartz.Simpl
         }
 
         protected virtual async Task<IPHostEntry> GetHostAddress(
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             var hostEntry = await Dns.GetHostEntryAsync(Dns.GetHostName()).ConfigureAwait(false);
             var firstAddressEntry = await Dns.GetHostEntryAsync(hostEntry.AddressList[0].ToString()).ConfigureAwait(false);

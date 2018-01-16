@@ -48,6 +48,9 @@ namespace Quartz.Util
             timeZoneIdAliases["China Standard Time"] = "Asia/Beijing";
             timeZoneIdAliases["Asia/Shanghai"] = "China Standard Time";
             timeZoneIdAliases["Asia/Beijing"] = "China Standard Time";
+
+            timeZoneIdAliases["Pakistan Standard Time"] = "Asia/Karachi";
+            timeZoneIdAliases["Asia/Karachi"] = "Pakistan Standard Time";
         }
 
         public static Func<string, TimeZoneInfo> CustomResolver = id => null;
@@ -109,14 +112,9 @@ namespace Quartz.Util
             {
                 info = TimeZoneInfo.FindSystemTimeZoneById(id);
             }
-#if !BUG_7552 // https://github.com/dotnet/corefx/issues/7552
             catch (TimeZoneNotFoundException)
-#else // !BUG_7552
-            catch (Exception)
-#endif // !BUG_7552
             {
-                string aliasedId;
-                if (timeZoneIdAliases.TryGetValue(id, out aliasedId))
+                if (timeZoneIdAliases.TryGetValue(id, out var aliasedId))
                 {
                     try
                     {

@@ -1,7 +1,7 @@
 ﻿#region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -184,7 +184,7 @@ namespace Quartz.Tests.Unit.Impl.Triggers
             DateTimeOffset startTime = dateOf(0, 0, 0, 1, 1, 2011); // Jan 1, 2011 was a saturday...
             TimeOfDay startTimeOfDay = new TimeOfDay(8, 0, 0);
             var trigger = new DailyTimeIntervalTriggerImpl();
-            var daysOfWeek = new HashSet<DayOfWeek>
+            var daysOfWeek = new List<DayOfWeek>
             {
                 DayOfWeek.Monday,
                 DayOfWeek.Tuesday,
@@ -417,7 +417,7 @@ namespace Quartz.Tests.Unit.Impl.Triggers
         [Test]
         public void TestMonOnly()
         {
-            HashSet<DayOfWeek> daysOfWeek = new HashSet<DayOfWeek>
+            var daysOfWeek = new ReadOnlyCompatibleHashSet<DayOfWeek>
             {
                 DayOfWeek.Monday
             };
@@ -508,8 +508,8 @@ namespace Quartz.Tests.Unit.Impl.Triggers
 
             var fireTimes = TriggerUtils.ComputeFireTimes(trigger, null, 48);
             Assert.AreEqual(48, fireTimes.Count);
-            Assert.AreEqual((DateBuilder.DateOf(8, 0, 2, 1, 1, 2011)), fireTimes[0]);
-            Assert.AreEqual((DateBuilder.DateOf(8, 56, 26, 1, 1, 2011)), fireTimes[47]);
+            Assert.AreEqual(DateBuilder.DateOf(8, 0, 2, 1, 1, 2011), fireTimes[0]);
+            Assert.AreEqual(DateBuilder.DateOf(8, 56, 26, 1, 1, 2011), fireTimes[47]);
         }
 
         [Test]
@@ -524,7 +524,7 @@ namespace Quartz.Tests.Unit.Impl.Triggers
                 StartTimeOfDay = startTimeOfDay,
                 EndTimeOfDay = endTimeOfDay,
                 RepeatIntervalUnit = IntervalUnit.Minute,
-                RepeatInterval = (72),
+                RepeatInterval = 72,
                 RepeatCount = DailyTimeIntervalTriggerImpl.RepeatIndefinitely
             };
 
@@ -679,7 +679,7 @@ namespace Quartz.Tests.Unit.Impl.Triggers
 
             //make an adjustment to only one trigger.
             //I only want mondays now
-            trigger1.DaysOfWeek = new HashSet<DayOfWeek>
+            trigger1.DaysOfWeek = new List<DayOfWeek>
             {
                 DayOfWeek.Monday
             };
@@ -864,8 +864,8 @@ namespace Quartz.Tests.Unit.Impl.Triggers
         public void TestPassingMidnight()
         {
             IOperableTrigger trigger = (IOperableTrigger) DailyTimeIntervalScheduleBuilder.Create()
-                .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(16, 00))
-                .EndingDailyAt(TimeOfDay.HourAndMinuteOfDay(00, 00))
+                .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(16, 0))
+                .EndingDailyAt(TimeOfDay.HourMinuteAndSecondOfDay(23, 59, 59))
                 .OnEveryDay()
                 .WithIntervalInMinutes(30)
                 .Build();
@@ -888,7 +888,7 @@ namespace Quartz.Tests.Unit.Impl.Triggers
             var endTimeOfDay = new TimeOfDay(3, 2, 1);
             var trigger = new DailyTimeIntervalTriggerImpl("name", "group", startTime, endTime, startTimeOfDay, endTimeOfDay, IntervalUnit.Hour, 10);
             trigger.RepeatCount = 12;
-            trigger.DaysOfWeek = new HashSet<DayOfWeek>
+            trigger.DaysOfWeek = new List<DayOfWeek>
             {
                 DayOfWeek.Thursday
             };

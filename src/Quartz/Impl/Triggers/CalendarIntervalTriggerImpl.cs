@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -53,9 +53,7 @@ namespace Quartz.Impl.Triggers
     /// <since>2.0</since>
     /// <author>James House</author>
     /// <author>Marko Lahma (.NET)</author>
-#if BINARY_SERIALIZATION
     [Serializable]
-#endif // BINARY_SERIALIZATION
     public class CalendarIntervalTriggerImpl : AbstractTrigger, ICalendarIntervalTrigger
     {
         private static readonly int YearToGiveupSchedulingAt = DateTime.Now.AddYears(100).Year;
@@ -75,7 +73,7 @@ namespace Quartz.Impl.Triggers
         private string timeZoneInfoId
         {
             get => timeZone?.Id;
-            set => timeZone = (value == null ? null : TimeZoneInfo.FindSystemTimeZoneById(value));
+            set => timeZone = value == null ? null : TimeZoneInfo.FindSystemTimeZoneById(value);
         }
 
         /// <summary>
@@ -142,8 +140,8 @@ namespace Quartz.Impl.Triggers
         {
             StartTimeUtc = startTimeUtc;
             EndTimeUtc = endTimeUtc;
-            RepeatIntervalUnit = (intervalUnit);
-            RepeatInterval = (repeatInterval);
+            RepeatIntervalUnit = intervalUnit;
+            RepeatInterval = repeatInterval;
         }
 
         /// <summary>
@@ -567,9 +565,9 @@ namespace Quartz.Impl.Triggers
 
             DateTimeOffset startMillis = StartTimeUtc;
             DateTimeOffset afterMillis = afterTime.Value;
-            DateTimeOffset endMillis = (EndTimeUtc == null) ? DateTimeOffset.MaxValue : EndTimeUtc.Value;
+            DateTimeOffset endMillis = EndTimeUtc ?? DateTimeOffset.MaxValue;
 
-            if (!ignoreEndTime && (endMillis <= afterMillis))
+            if (!ignoreEndTime && endMillis <= afterMillis)
             {
                 return null;
             }
@@ -871,7 +869,7 @@ namespace Quartz.Impl.Triggers
         /// <returns></returns>
         public override bool GetMayFireAgain()
         {
-            return (GetNextFireTimeUtc() != null);
+            return GetNextFireTimeUtc() != null;
         }
 
         /// <summary>

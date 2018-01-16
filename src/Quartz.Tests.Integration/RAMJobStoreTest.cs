@@ -21,7 +21,7 @@ namespace Quartz.Tests.Integration
         {
             public Task Execute(IJobExecutionContext context)
             {
-                return Task.FromResult(0);
+                return TaskUtil.CompletedTask;
             }
         }
 
@@ -29,7 +29,7 @@ namespace Quartz.Tests.Integration
         {
             public Task Execute(IJobExecutionContext context)
             {
-                return Task.FromResult(0);
+                return TaskUtil.CompletedTask;
             }
         }
 
@@ -47,14 +47,14 @@ namespace Quartz.Tests.Integration
                     jobExecTimestamps.Add(DateTime.UtcNow);
 
                     barrier.SignalAndWait(testTimeout);
-                    return Task.FromResult(0);
+                    return TaskUtil.CompletedTask;
                 }
                 catch (Exception e)
                 {
                     Console.Write(e);
                     Assert.Fail("Await on barrier was interrupted: " + e);
                 }
-                return Task.FromResult(0);
+                return TaskUtil.CompletedTask;
             }
         }
 
@@ -64,7 +64,7 @@ namespace Quartz.Tests.Integration
         {
             public Task Execute(IJobExecutionContext context)
             {
-                return Task.FromResult(0);
+                return TaskUtil.CompletedTask;
             }
         }
 
@@ -323,7 +323,7 @@ namespace Quartz.Tests.Integration
 
             DateTime fTime = jobExecTimestamps[0];
 
-            Assert.That((fTime - sTime < TimeSpan.FromMilliseconds(7000)), "Immediate trigger did not fire within a reasonable amount of time."); // This is dangerously subjective!  but what else to do?
+            Assert.That(fTime - sTime < TimeSpan.FromMilliseconds(7000), "Immediate trigger did not fire within a reasonable amount of time."); // This is dangerously subjective!  but what else to do?
         }
 
         [Test]
@@ -341,7 +341,7 @@ namespace Quartz.Tests.Integration
                 .WithSimpleSchedule(x => x.WithIntervalInSeconds(1).RepeatForever())
                 .Build();
 
-            var triggersForJob = new HashSet<ITrigger>();
+            var triggersForJob = new List<ITrigger>();
             triggersForJob.Add(trigger1);
             triggersForJob.Add(trigger2);
 

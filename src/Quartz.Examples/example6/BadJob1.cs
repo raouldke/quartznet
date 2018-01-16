@@ -1,7 +1,7 @@
 #region License
 
 /* 
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved. 
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
  * use this file except in compliance with the License. You may obtain a copy 
@@ -21,6 +21,8 @@
 
 using System;
 using System.Threading.Tasks;
+
+using Quartz.Logging;
 
 namespace Quartz.Examples.Example6
 {
@@ -70,7 +72,7 @@ namespace Quartz.Examples.Example6
             }
 
             log.InfoFormat("---{0} completed at {1}", jobKey, DateTime.Now.ToString("r"));
-            return Task.FromResult(0);
+            return TaskUtil.CompletedTask;
         }
     }
 }

@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -72,7 +72,7 @@ namespace Quartz.Spi
         int BlockForAvailableThreads();
 
         /// <summary>
-        /// Must be called before the <see cref="ThreadPool" /> is
+        /// Must be called before the thread pool is
         /// used, in order to give the it a chance to Initialize.
         /// </summary>
         /// <remarks>
@@ -81,7 +81,7 @@ namespace Quartz.Spi
         void Initialize();
 
         /// <summary>
-        /// Called by the QuartzScheduler to inform the <see cref="ThreadPool" />
+        /// Called by the QuartzScheduler to inform the thread pool
         /// that it should free up all of it's resources because the scheduler is
         /// shutting down.
         /// </summary>

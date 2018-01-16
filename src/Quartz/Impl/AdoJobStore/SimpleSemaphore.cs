@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -25,7 +25,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Quartz.Logging;
-using Quartz.Util;
 
 namespace Quartz.Impl.AdoJobStore
 {
@@ -58,7 +57,7 @@ namespace Quartz.Impl.AdoJobStore
             Guid requestorId, 
             ConnectionAndTransactionHolder conn, 
             string lockName,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             if (log.IsDebugEnabled())
             {
@@ -89,8 +88,7 @@ namespace Quartz.Impl.AdoJobStore
                         }
                     }
 
-                    HashSet<string> requestorLocks;
-                    if (!threadLocks.TryGetValue(requestorId, out requestorLocks))
+                    if (!threadLocks.TryGetValue(requestorId, out var requestorLocks))
                     {
                         requestorLocks = new HashSet<string>();
                         threadLocks[requestorId] = requestorLocks;
@@ -118,14 +116,13 @@ namespace Quartz.Impl.AdoJobStore
         public virtual Task ReleaseLock(
             Guid requestorId, 
             string lockName,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             lock (syncRoot)
             {
                 if (IsLockOwner(requestorId, lockName))
                 {
-                    HashSet<string> requestorLocks;
-                    if (threadLocks.TryGetValue(requestorId, out requestorLocks))
+                    if (threadLocks.TryGetValue(requestorId, out var requestorLocks))
                     {
                         requestorLocks.Remove(lockName);
                         if (requestorLocks.Count == 0)
@@ -156,8 +153,7 @@ namespace Quartz.Impl.AdoJobStore
         /// </summary>
         private bool IsLockOwner(Guid requestorId, string lockName)
         {
-            HashSet<string> requestorLocks;
-            return threadLocks.TryGetValue(requestorId, out requestorLocks) && requestorLocks.Contains(lockName);
+            return threadLocks.TryGetValue(requestorId, out var requestorLocks) && requestorLocks.Contains(lockName);
         }
 
         /// <summary>

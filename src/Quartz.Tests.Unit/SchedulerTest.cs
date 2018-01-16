@@ -11,9 +11,8 @@ using Quartz.Impl;
 using Quartz.Impl.Matchers;
 using Quartz.Job;
 using Quartz.Spi;
-#if BINARY_SERIALIZATION
+
 using System.IO;
-#endif
 
 namespace Quartz.Tests.Unit
 {
@@ -26,7 +25,7 @@ namespace Quartz.Tests.Unit
         {
             public Task Execute(IJobExecutionContext context)
             {
-                return Task.FromResult(0);
+                return TaskUtil.CompletedTask;
             }
         }
 
@@ -34,7 +33,7 @@ namespace Quartz.Tests.Unit
         {
             public Task Execute(IJobExecutionContext context)
             {
-                return Task.FromResult(0);
+                return TaskUtil.CompletedTask;
             }
         }
 
@@ -44,7 +43,7 @@ namespace Quartz.Tests.Unit
         {
             public Task Execute(IJobExecutionContext context)
             {
-                return Task.FromResult(0);
+                return TaskUtil.CompletedTask;
             }
         }
 
@@ -60,7 +59,7 @@ namespace Quartz.Tests.Unit
             IScheduler scheduler = await factory.GetScheduler();
             var job = JobBuilder.Create<NoOpJob>().Build();
             var crontTriggers = input.Split('|').Select(x => x.Trim()).Select(cronExpression => TriggerBuilder.Create().WithCronSchedule(cronExpression).Build());
-            await scheduler.ScheduleJob(job, new HashSet<ITrigger>(crontTriggers), replace: false);
+            await scheduler.ScheduleJob(job, new List<ITrigger>(crontTriggers), replace: false);
         }
 
         [Test]
@@ -255,7 +254,6 @@ namespace Quartz.Tests.Unit
             Assert.True(Process.GetCurrentProcess().Threads.Count <= activeThreads);
         }
 
-#if BINARY_SERIALIZATION
         [Test]
         public void SerializationExceptionTest()
         {
@@ -290,7 +288,6 @@ namespace Quartz.Tests.Unit
             Assert.NotNull(after.InnerException);
             Assert.AreEqual(before.ToString(), after.ToString());
         }
-#endif
 
         [Test]
         [Category("fragile")] // TODO seems that we have some trouble on Linux with this

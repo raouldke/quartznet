@@ -1,6 +1,6 @@
 #region License
 /* 
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved. 
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
  * use this file except in compliance with the License. You may obtain a copy 
@@ -81,12 +81,11 @@ namespace Quartz.Impl
 	    /// </summary>
 	    public virtual Task<IScheduler> Lookup(
 		    string schedName, 
-		    CancellationToken cancellationToken = default(CancellationToken))
+		    CancellationToken cancellationToken = default)
 		{
 			lock (syncRoot)
 			{
-			    IScheduler retValue;
-			    schedulers.TryGetValue(schedName, out retValue);
+				schedulers.TryGetValue(schedName, out var retValue);
 				return Task.FromResult(retValue);
 			}
 		}
@@ -96,7 +95,7 @@ namespace Quartz.Impl
 	    /// </summary>
 	    /// <returns></returns>
 	    public virtual Task<IReadOnlyList<IScheduler>> LookupAll(
-		    CancellationToken cancellationToken = default(CancellationToken))
+		    CancellationToken cancellationToken = default)
 		{
 			lock (syncRoot)
 			{

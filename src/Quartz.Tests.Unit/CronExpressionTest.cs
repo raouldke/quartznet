@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -31,9 +31,7 @@ using Quartz.Util;
 namespace Quartz.Tests.Unit
 {
     /// <author>Marko Lahma (.NET)</author>
-#if BINARY_SERIALIZATION
     [TestFixture(typeof(BinaryObjectSerializer))]
-#endif
     [TestFixture(typeof(JsonObjectSerializer))]
     public class CronExpressionTest : SerializationTestSupport
     {
@@ -297,7 +295,8 @@ namespace Quartz.Tests.Unit
             DateTime start = new DateTime(2008, 12, 19, 0, 0, 0);
             for (int i = 0; i < 200; ++i)
             {
-                bool shouldFire = (start.Hour >= 10 && start.Hour <= 13 && start.Minute == 30 && (start.DayOfWeek == DayOfWeek.Wednesday || start.DayOfWeek == DayOfWeek.Friday));
+                bool shouldFire = start.Hour >= 10 && start.Hour <= 13 && start.Minute == 30
+                                  && (start.DayOfWeek == DayOfWeek.Wednesday || start.DayOfWeek == DayOfWeek.Friday);
                 shouldFire = shouldFire && start.Day > 15 && start.Day < 28;
 
                 bool satisfied = ce.IsSatisfiedBy(start.ToUniversalTime());
@@ -508,7 +507,6 @@ namespace Quartz.Tests.Unit
             }
         }
 
-#if !NETCORE
         [Test]
         public void TestDaylightSaving_QRTZNETZ186()
         {
@@ -524,7 +522,6 @@ namespace Quartz.Tests.Unit
             DateTimeOffset expected = daylightChange.Start.Add(daylightChange.Delta).AddMinutes(15).ToUniversalTime();
             Assert.AreEqual(expected, after.Value);
         }
-#endif
 
         [Test]
         public void TestDaylightSavingsDoesNotMatchAnHourBefore()

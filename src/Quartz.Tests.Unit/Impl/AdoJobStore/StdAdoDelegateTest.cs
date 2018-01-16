@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -39,9 +39,7 @@ using Quartz.Spi;
 namespace Quartz.Tests.Unit.Impl.AdoJobStore
 {
     /// <author>Marko Lahma (.NET)</author>
-#if BINARY_SERIALIZATION
     [TestFixture(typeof(BinaryObjectSerializer))]
-#endif
     [TestFixture(typeof(JsonObjectSerializer))]
     public class StdAdoDelegateTest
     {
@@ -56,11 +54,7 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
         [Test]
         public void TestSerializeJobData()
         {
-#if BINARY_SERIALIZATION
             bool binary = serializer.GetType() == typeof(BinaryObjectSerializer);
-#else
-            bool binary = false;
-#endif
 
             var args = new DelegateInitializationArgs();
             args.TablePrefix = "QRTZ_";

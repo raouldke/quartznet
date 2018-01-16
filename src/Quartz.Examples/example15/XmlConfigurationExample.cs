@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 
 using Quartz.Impl;
 using Quartz.Impl.Calendar;
+using Quartz.Logging;
 
 namespace Quartz.Examples.Example15
 {
@@ -46,7 +47,7 @@ namespace Quartz.Examples.Example15
                 ["quartz.scheduler.instanceName"] = "XmlConfiguredInstance",
                 ["quartz.threadPool.type"] = "Quartz.Simpl.SimpleThreadPool, Quartz",
                 ["quartz.threadPool.threadCount"] = "5",
-                ["quartz.plugin.xml.type"] = "Quartz.Plugin.Xml.XMLSchedulingDataProcessorPlugin, Quartz",
+                ["quartz.plugin.xml.type"] = "Quartz.Plugin.Xml.XMLSchedulingDataProcessorPlugin, Quartz.Plugins",
                 ["quartz.plugin.xml.fileNames"] = "~/quartz_jobs.xml",
                 // this is the default
                 ["quartz.plugin.xml.FailOnFileNotFound"] = "true",

@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -68,15 +68,9 @@ namespace Quartz.Impl
     /// <seealso cref="JobDataMap" />
     /// <author>James House</author>
     /// <author>Marko Lahma (.NET)</author>
-#if BINARY_SERIALIZATION
     [Serializable]
-#endif // BINARY_SERIALIZATION
     public class JobExecutionContextImpl : ICancellableJobExecutionContext
     {
-#if BINARY_SERIALIZATION
-        [NonSerialized]
-#endif // BINARY_SERIALIZATION
-
         private readonly ITrigger trigger;
         private readonly IJobDetail jobDetail;
         private readonly JobDataMap jobDataMap;
@@ -313,8 +307,7 @@ namespace Quartz.Impl
         /// </param>
         public virtual object Get(object key)
         {
-            object retValue;
-            data.TryGetValue(key, out retValue);
+            data.TryGetValue(key, out var retValue);
             return retValue;
         }
 

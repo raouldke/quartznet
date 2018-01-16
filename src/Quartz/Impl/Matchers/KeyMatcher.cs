@@ -1,7 +1,7 @@
 #region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -19,9 +19,7 @@
 
 #endregion
 
-#if BINARY_SERIALIZATION
 using System;
-#endif // BINARY_SERIALIZATION
 
 using Quartz.Util;
 
@@ -32,9 +30,7 @@ namespace Quartz.Impl.Matchers
     /// </summary>
     /// <author>James House</author>
     /// <author>Marko Lahma (.NET)</author>
-#if BINARY_SERIALIZATION
     [Serializable]
-#endif // BINARY_SERIALIZATION
     public class KeyMatcher<TKey> : IMatcher<TKey> where TKey : Key<TKey>
     {
         // ReSharper disable once UnusedMember.Local
@@ -69,7 +65,7 @@ namespace Quartz.Impl.Matchers
         {
             const int Prime = 31;
             int result = 1;
-            result = Prime*result + ((CompareToValue == null) ? 0 : CompareToValue.GetHashCode());
+            result = Prime*result + (CompareToValue == null ? 0 : CompareToValue.GetHashCode());
             return result;
         }
 

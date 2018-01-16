@@ -92,37 +92,37 @@ namespace Quartz.Tests.Integration.Impl
                     job = new JobDetailImpl("job_" + count, schedId, typeof (SimpleRecoveryJob));
                     // ask scheduler to re-Execute this job if it was in progress when
                     // the scheduler went down...
-                    job.RequestsRecovery = (true);
+                    job.RequestsRecovery = true;
                     trigger = new SimpleTriggerImpl("trig_" + count, schedId, 20, TimeSpan.FromSeconds(5));
 
-                    trigger.StartTimeUtc = (DateTime.Now.AddMilliseconds(2000L));
+                    trigger.StartTimeUtc = DateTime.Now.AddMilliseconds(2000L);
                     await scheduler.ScheduleJob(job, trigger);
 
                     count++;
                     job = new JobDetailImpl("job_" + count, schedId, typeof (SimpleRecoveryStatefulJob));
                     // ask scheduler to re-Execute this job if it was in progress when
                     // the scheduler went down...
-                    job.RequestsRecovery = (true);
+                    job.RequestsRecovery = true;
                     trigger = new SimpleTriggerImpl("trig_" + count, schedId, 20, TimeSpan.FromSeconds(3));
 
-                    trigger.StartTimeUtc = (DateTime.Now.AddMilliseconds(1000L));
+                    trigger.StartTimeUtc = DateTime.Now.AddMilliseconds(1000L);
                     await scheduler.ScheduleJob(job, trigger);
 
                     count++;
                     job = new JobDetailImpl("job_" + count, schedId, typeof (SimpleRecoveryJob));
                     // ask scheduler to re-Execute this job if it was in progress when
                     // the scheduler went down...
-                    job.RequestsRecovery = (true);
+                    job.RequestsRecovery = true;
                     trigger = new SimpleTriggerImpl("trig_" + count, schedId, 20, TimeSpan.FromSeconds(4));
 
-                    trigger.StartTimeUtc = (DateTime.Now.AddMilliseconds(1000L));
+                    trigger.StartTimeUtc = DateTime.Now.AddMilliseconds(1000L);
                     await scheduler.ScheduleJob(job, trigger);
 
                     count++;
                     job = new JobDetailImpl("job_" + count, schedId, typeof (SimpleRecoveryJob));
                     // ask scheduler to re-Execute this job if it was in progress when
                     // the scheduler went down...
-                    job.RequestsRecovery = (true);
+                    job.RequestsRecovery = true;
                     trigger = new SimpleTriggerImpl("trig_" + count, schedId, 20, TimeSpan.FromMilliseconds(4500));
                     await scheduler.ScheduleJob(job, trigger);
 
@@ -130,7 +130,7 @@ namespace Quartz.Tests.Integration.Impl
                     job = new JobDetailImpl("job_" + count, schedId, typeof (SimpleRecoveryJob));
                     // ask scheduler to re-Execute this job if it was in progress when
                     // the scheduler went down...
-                    job.RequestsRecovery = (true);
+                    job.RequestsRecovery = true;
                     IOperableTrigger ct = new CronTriggerImpl("cron_trig_" + count, schedId, "0/10 * * * * ?");
                     ct.JobDataMap.Add("key", "value");
                     ct.StartTimeUtc = DateTime.Now.AddMilliseconds(1000);
@@ -141,7 +141,7 @@ namespace Quartz.Tests.Integration.Impl
                     job = new JobDetailImpl("job_" + count, schedId, typeof (SimpleRecoveryJob));
                     // ask scheduler to re-Execute this job if it was in progress when
                     // the scheduler went down...
-                    job.RequestsRecovery = (true);
+                    job.RequestsRecovery = true;
 
                     var timeZone1 = TimeZoneUtil.FindTimeZoneById("Central European Standard Time");
                     var timeZone2 = TimeZoneUtil.FindTimeZoneById("Mountain Standard Time");
@@ -186,7 +186,7 @@ namespace Quartz.Tests.Integration.Impl
                     Assert.That(triggerFromDb.EndTimeOfDay.Minute, Is.EqualTo(3));
                     Assert.That(triggerFromDb.EndTimeOfDay.Second, Is.EqualTo(4));
 
-                    job.RequestsRecovery = (true);
+                    job.RequestsRecovery = true;
                     CalendarIntervalTriggerImpl intervalTrigger = new CalendarIntervalTriggerImpl(
                         "calint_trig_" + count,
                         schedId,
@@ -197,14 +197,13 @@ namespace Quartz.Tests.Integration.Impl
                     intervalTrigger.JobKey = job.Key;
 
                     await scheduler.ScheduleJob(intervalTrigger);
-                    
-#if CUSTOM_TIME_ZONES
+
                     // custom time zone
                     const string CustomTimeZoneId = "Custom TimeZone";
                     var webTimezone = TimeZoneInfo.CreateCustomTimeZone(
-                        CustomTimeZoneId, 
+                        CustomTimeZoneId,
                         TimeSpan.FromMinutes(22),
-                        null, 
+                        null,
                         null);
 
                     TimeZoneUtil.CustomResolver = id =>
@@ -215,7 +214,7 @@ namespace Quartz.Tests.Integration.Impl
                         }
                         return null;
                     };
-                    
+
                     var customTimeZoneTrigger = TriggerBuilder.Create()
                         .WithIdentity("customTimeZoneTrigger")
                         .WithCronSchedule("0/5 * * * * ?", x => x.InTimeZone(webTimezone))
@@ -226,12 +225,12 @@ namespace Quartz.Tests.Integration.Impl
                     await scheduler.ScheduleJob(customTimeZoneTrigger);
                     var loadedCustomTimeZoneTrigger = (ICronTrigger) await scheduler.GetTrigger(customTimeZoneTrigger.Key);
                     Assert.That(loadedCustomTimeZoneTrigger.TimeZone.BaseUtcOffset, Is.EqualTo(TimeSpan.FromMinutes(22)));
-#endif
+
                     // bulk operations
                     var info = new Dictionary<IJobDetail, IReadOnlyCollection<ITrigger>>();
                     IJobDetail detail = new JobDetailImpl("job_" + count, schedId, typeof (SimpleRecoveryJob));
                     ITrigger simple = new SimpleTriggerImpl("trig_" + count, schedId, 20, TimeSpan.FromMilliseconds(4500));
-                    var triggers = new HashSet<ITrigger>();
+                    var triggers = new List<ITrigger>();
                     triggers.Add(simple);
                     info[detail] = triggers;
 
@@ -413,7 +412,7 @@ namespace Quartz.Tests.Integration.Impl
         {
             TriggeredCount++;
             triggered.Set();
-            return Task.FromResult(0);
+            return TaskUtil.CompletedTask;
         }
 
         public static int TriggeredCount { get; private set; }

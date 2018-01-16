@@ -1,7 +1,7 @@
 #region License
 
 /* 
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved. 
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
  * use this file except in compliance with the License. You may obtain a copy 
@@ -127,7 +127,7 @@ namespace Quartz.Tests.Unit
         {
             string className = type.Name;
             int index = className.LastIndexOf(".");
-            index = (index < 0) ? 0 : index + 1;
+            index = index < 0 ? 0 : index + 1;
 
             return $"{className.Substring(index)}-{version}.ser";
         }

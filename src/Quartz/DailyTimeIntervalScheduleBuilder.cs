@@ -1,7 +1,7 @@
 ﻿#region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -109,19 +109,19 @@ namespace Quartz
 
         static DailyTimeIntervalScheduleBuilder()
         {
-            var allDaysOfTheWeek = new HashSet<DayOfWeek>();
-            var mondayThroughFriday = new HashSet<DayOfWeek>();
+            var allDaysOfTheWeek = new ReadOnlyCompatibleHashSet<DayOfWeek>();
+            var mondayThroughFriday = new ReadOnlyCompatibleHashSet<DayOfWeek>();
             foreach (DayOfWeek d in Enum.GetValues(typeof(DayOfWeek)))
             {
                 allDaysOfTheWeek.Add(d);
 
-                if ((d >= DayOfWeek.Monday) && (d <= DayOfWeek.Friday))
+                if (d >= DayOfWeek.Monday && d <= DayOfWeek.Friday)
                 {
                     mondayThroughFriday.Add(d);
                 }
             }
 
-            SaturdayAndSunday = new HashSet<DayOfWeek>
+            SaturdayAndSunday = new ReadOnlyCompatibleHashSet<DayOfWeek>
             {
                 DayOfWeek.Sunday,
                 DayOfWeek.Saturday
@@ -129,9 +129,9 @@ namespace Quartz
 
             AllDaysOfTheWeek = allDaysOfTheWeek;
             MondayThroughFriday = mondayThroughFriday;
-            AllDaysOfTheWeek = new HashSet<DayOfWeek>(AllDaysOfTheWeek);
-            MondayThroughFriday = new HashSet<DayOfWeek>(MondayThroughFriday);
-            SaturdayAndSunday = new HashSet<DayOfWeek>(SaturdayAndSunday);
+            AllDaysOfTheWeek = new ReadOnlyCompatibleHashSet<DayOfWeek>(AllDaysOfTheWeek);
+            MondayThroughFriday = new ReadOnlyCompatibleHashSet<DayOfWeek>(MondayThroughFriday);
+            SaturdayAndSunday = new ReadOnlyCompatibleHashSet<DayOfWeek>(SaturdayAndSunday);
         }
 
         protected DailyTimeIntervalScheduleBuilder()
@@ -164,11 +164,11 @@ namespace Quartz
 
             if (daysOfWeek != null)
             {
-                st.DaysOfWeek = new HashSet<DayOfWeek>(daysOfWeek);
+                st.DaysOfWeek = new ReadOnlyCompatibleHashSet<DayOfWeek>(daysOfWeek);
             }
             else
             {
-                st.DaysOfWeek = new HashSet<DayOfWeek>(AllDaysOfTheWeek);
+                st.DaysOfWeek = new ReadOnlyCompatibleHashSet<DayOfWeek>(AllDaysOfTheWeek);
             }
 
             if (startTimeOfDayUtc != null)
@@ -204,8 +204,8 @@ namespace Quartz
         /// <seealso cref="ICalendarIntervalTrigger.RepeatIntervalUnit" />
         public DailyTimeIntervalScheduleBuilder WithInterval(int interval, IntervalUnit unit)
         {
-            if (!((unit == IntervalUnit.Second) ||
-                  (unit == IntervalUnit.Minute) || (unit == IntervalUnit.Hour)))
+            if (!(unit == IntervalUnit.Second ||
+                  unit == IntervalUnit.Minute || unit == IntervalUnit.Hour))
             {
                 throw new ArgumentException("Invalid repeat IntervalUnit (must be Second, Minute or Hour).");
             }
@@ -396,7 +396,7 @@ namespace Quartz
                 throw new ArgumentException("The startTimeOfDay is too late with given Interval and IntervalUnit values.");
             }
 
-            long maxNumOfCount = (remainingMillisInDay.Ticks / intervalInMillis.Ticks);
+            long maxNumOfCount = remainingMillisInDay.Ticks / intervalInMillis.Ticks;
             if (count > maxNumOfCount)
             {
                 throw new ArgumentException("The given count " + count + " is too large! The max you can set is " + maxNumOfCount);

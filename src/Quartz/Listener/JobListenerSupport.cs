@@ -1,6 +1,6 @@
 #region License
 /* 
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved. 
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
  * use this file except in compliance with the License. You may obtain a copy 
@@ -21,7 +21,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Quartz.Spi;
-using Quartz.Util;
 
 namespace Quartz.Listener
 {
@@ -63,7 +62,7 @@ namespace Quartz.Listener
         /// <seealso cref="JobExecutionVetoed"/>
         public virtual Task JobToBeExecuted(
             IJobExecutionContext context, 
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return TaskUtil.CompletedTask;
         }
@@ -79,7 +78,7 @@ namespace Quartz.Listener
         /// <seealso cref="JobToBeExecuted"/>
         public virtual Task JobExecutionVetoed(
             IJobExecutionContext context,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return TaskUtil.CompletedTask;
         }
@@ -95,7 +94,7 @@ namespace Quartz.Listener
         public virtual Task JobWasExecuted(
             IJobExecutionContext context,
             JobExecutionException jobException,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return TaskUtil.CompletedTask;
         }

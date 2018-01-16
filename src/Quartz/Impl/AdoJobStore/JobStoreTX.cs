@@ -1,6 +1,6 @@
 #region License
 /* 
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved. 
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
  * use this file except in compliance with the License. You may obtain a copy 
@@ -23,7 +23,6 @@ using System.Threading.Tasks;
 
 using Quartz.Logging;
 using Quartz.Spi;
-using Quartz.Util;
 
 namespace Quartz.Impl.AdoJobStore
 {
@@ -43,7 +42,7 @@ namespace Quartz.Impl.AdoJobStore
         public override Task Initialize(
             ITypeLoadHelper loadHelper, 
             ISchedulerSignaler signaler,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             base.Initialize(loadHelper, signaler, cancellationToken);
             Log.Info("JobStoreTX initialized.");
@@ -80,7 +79,7 @@ namespace Quartz.Impl.AdoJobStore
         protected override Task<T> ExecuteInLock<T>(
             string lockName, 
             Func<ConnectionAndTransactionHolder, Task<T>> txCallback,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return ExecuteInNonManagedTXLock(lockName, txCallback, cancellationToken);
         }

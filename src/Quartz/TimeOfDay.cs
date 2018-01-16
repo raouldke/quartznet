@@ -1,7 +1,7 @@
 ﻿#region License
 
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
+ * All content copyright Marko Lahma, unless otherwise indicated. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -35,9 +35,7 @@ namespace Quartz
     /// <author>James House</author>
     /// <author>Zemian Deng saltnlight5@gmail.com</author>
     /// <author>Nuno Maia (.NET)</author>
-#if BINARY_SERIALIZATION
     [Serializable]
-#endif // BINARY_SERIALIZATION
     public class TimeOfDay
     {
         /// <summary>
@@ -169,7 +167,7 @@ namespace Quartz
 
             TimeOfDay other = (TimeOfDay) obj;
 
-            return (other.Hour == Hour && other.Minute == Minute && other.Second == Second);
+            return other.Hour == Hour && other.Minute == Minute && other.Second == Second;
         }
 
         public override int GetHashCode()
