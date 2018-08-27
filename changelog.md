@@ -2,6 +2,73 @@
 
 [http://www.quartz-scheduler.net](http://www.quartz-scheduler.net)
 
+## Release 3.0.6, Jul 6 2018
+
+This release fixes a nasty bug with JSON calendar database serialization and .NET Core SQL Server client libraries
+have been updated to mitigiate possible hangs when connection drops occur.
+
+Also some other minor bugs have been also addressed.
+
+You should now be able to debug into Quartz.NET sources with added SourceLink support.
+
+* NEW FEATURE
+
+    * Add SourceLink support (#642)
+    * Make JobInterrupted method virtual in class SchedulerListenerSupport (#631)
+
+* FIXES
+
+    * Trigger group can be left as paused when all triggers have been removed (#641)
+    * PlatformNotSupportedException on RaspberryPi (Windows IoT) (#630)
+    * JSON serialisation returning defaults for derived calendar settings (#634)
+    * .NET Core version not able to recover from DB connection drops (#637)
+
+
+## Release 3.0.5, May 27 2018
+
+This release fixes couple bugs and adds support for .NET Core version of Oracle's managed data access library.
+
+* NEW FEATURE
+
+    * Support Oracle.ManagedDataAccess.Core (#609)
+
+* FIXES
+
+	* trigger loop encountered using DailyTimeIntervalTrigger across DST start boundary (#610)
+	* Missing ConfigureAwait(false) in some parts of code (#618)
+	
+
+## Release 3.0.4, Mar 4 2018
+
+This release fixes a nasty memory leak caused by QuartzSchedulerThread sharing
+its CancellationTokenSource with calls it makes. Everyone using 3.x is advised to upgrade.
+
+* FIXES
+
+	* Memory leak caused by CancellationTokenSource sharing (#600)
+	* tables_oracle.sql should use NUMBER(19) instead of NUMBER(13) for long properties (#598)
+
+
+## Release 3.0.3, Feb 24 2018
+
+* FIXES
+
+	* XML scheduling no longer requires write access to source XML file (#591)
+	* Improve listener error handling (#589)
+	* SQL command parameters are not defined in 'IsTriggerStillPresent' method (#579)
+	* Source distribution couldn't be built with build.cmd/.sh when no .git directory present (#596)
+    * Currently executing jobs cannot be retrieved via remoting (#580)
+	
+	
+## Release 3.0.2, Jan 25 2018
+
+This is a minor fix release that fixes single issue that still prevented full usage of remoting.
+
+* FIXES
+
+	* Mark ReadOnlyCompatibleHashSet as serializable (#576)
+
+
 ## Release 3.0.1, Jan 21 2018
 
 This is a bug fix release that fixes cron expression parsing bug and reverts IRemotableQuartzScheduler

@@ -13,6 +13,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Topshelf" Version="4.0.4" />
     <ProjectReference Include="..\Quartz\Quartz.csproj" />
     <ProjectReference Include="..\Quartz.Serialization.Json\Quartz.Serialization.Json.csproj" />
     <ProjectReference Include="..\Quartz.Plugins\Quartz.Plugins.csproj" />
@@ -22,12 +23,11 @@
     <PackageReference Include="Microsoft.AspNetCore.Server.IISIntegration" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFullFrameworkVersion)' ">
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="Microsoft.CSharp" />
-    <PackageReference Include="Topshelf" Version="4.0.3" />
   </ItemGroup>
 </Project>

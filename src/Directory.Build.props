@@ -22,12 +22,12 @@
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
     <PackageReleaseNotes>https://github.com/quartznet/quartznet/releases</PackageReleaseNotes>
 
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/quartznet/quartznet</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
 
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 
-    <VersionPrefix>3.0.1</VersionPrefix>
+    <VersionPrefix>3.0.6</VersionPrefix>
     <VersionSuffix Condition="'$(VersionSuffix)'!='' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
 
     <CLSCompliant>True</CLSCompliant>
@@ -37,10 +37,16 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 
-    <LangVersion>7.1</LangVersion>
+    <LangVersion>latest</LangVersion>
     <TargetFullFrameworkVersion>net452</TargetFullFrameworkVersion>
 
+    <IsTestProject>$(MSBuildProjectName.Contains('Tests'))</IsTestProject>
+
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsTestProject)' != 'true' and '$(SourceLinkEnabled)' != 'false'">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63102-01" PrivateAssets="All"/>
+  </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == '$(TargetFullFrameworkVersion)' ">
     <DefineConstants>$(DefineConstants);REMOTING</DefineConstants>

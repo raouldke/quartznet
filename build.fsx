@@ -4,7 +4,13 @@ open Fake
 open Fake.AssemblyInfoFile
 open Fake.Git
 
-let commitHash = Information.getCurrentHash()
+let commitHash =
+    try
+        Information.getCurrentHash()
+    with ex -> 
+        printfn "Could not get Git commit hash: %A" ex
+        ""
+
 let configuration = getBuildParamOrDefault "configuration" "Release"
 
 Target "Clean" (fun _ ->
@@ -15,7 +21,8 @@ Target "Clean" (fun _ ->
 Target "GenerateAssemblyInfo" (fun _ ->
     CreateCSharpAssemblyInfo "./src/AssemblyInfo.cs"
         [
-            (Attribute.Metadata("githash", commitHash))]
+            (Attribute.Metadata("githash", commitHash))
+        ]
 )
 
 Target "Build" (fun _ ->
@@ -39,6 +46,7 @@ Target "Pack" (fun _ ->
     !! "src/Quartz/Quartz.csproj"
         ++ "src/Quartz.Jobs/Quartz.Jobs.csproj"
         ++ "src/Quartz.Plugins/Quartz.Plugins.csproj"
+        ++ "src/Quartz.Plugins.TimeZoneConverter/Quartz.Plugins.TimeZoneConverter.csproj"
         ++ "src/Quartz.Serialization.Json/Quartz.Serialization.Json.csproj"
         |> Seq.iter pack
 

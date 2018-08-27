@@ -21,9 +21,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Quartz.Logging;
 
 namespace Quartz.Listener
 {
@@ -44,6 +45,7 @@ namespace Quartz.Listener
     public class BroadcastJobListener : IJobListener
     {
         private readonly List<IJobListener> listeners;
+        private readonly ILog log;
 
         /// <summary>
         /// Construct an instance with the given name.
@@ -56,6 +58,7 @@ namespace Quartz.Listener
         {
             Name = name ?? throw new ArgumentNullException(nameof(name), "Listener name cannot be null!");
             listeners = new List<IJobListener>();
+            log = LogProvider.GetLogger(GetType());
         }
 
         /// <summary>
@@ -99,14 +102,14 @@ namespace Quartz.Listener
             IJobExecutionContext context, 
             CancellationToken cancellationToken = default)
         {
-            return Task.WhenAll(listeners.Select(l => l.JobToBeExecuted(context, cancellationToken)));
+            return IterateListenersInGuard(l => l.JobToBeExecuted(context, cancellationToken), nameof(JobToBeExecuted));
         }
 
         public Task JobExecutionVetoed(
             IJobExecutionContext context,
             CancellationToken cancellationToken = default)
         {
-            return Task.WhenAll(listeners.Select(l => l.JobExecutionVetoed(context, cancellationToken)));
+            return IterateListenersInGuard(l => l.JobExecutionVetoed(context, cancellationToken), nameof(JobExecutionVetoed));
         }
 
         public Task JobWasExecuted(
@@ -114,7 +117,25 @@ namespace Quartz.Listener
             JobExecutionException jobException,
             CancellationToken cancellationToken = default)
         {
-            return Task.WhenAll(listeners.Select(l => l.JobWasExecuted(context, jobException, cancellationToken)));
+            return IterateListenersInGuard(l => l.JobWasExecuted(context, jobException, cancellationToken), nameof(JobWasExecuted));
+        }
+
+        private async Task IterateListenersInGuard(Func<IJobListener, Task> action, string methodName)
+        {
+            foreach (var listener in listeners)
+            {
+                try
+                {
+                    await action(listener).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    if (log.IsErrorEnabled())
+                    {
+                        log.ErrorException($"Listener {listener.Name} - method {methodName} raised an exception: {e.Message}", e);
+                    }
+                }
+            }
         }
     }
 }

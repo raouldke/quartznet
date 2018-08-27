@@ -60,9 +60,10 @@ namespace Quartz.Impl.AdoJobStore
         private bool useProperties;
         private ITypeLoadHelper typeLoadHelper;
         private AdoUtil adoUtil;
-        private readonly IList<ITriggerPersistenceDelegate> triggerPersistenceDelegates = new List<ITriggerPersistenceDelegate>();
+        private readonly List<ITriggerPersistenceDelegate> triggerPersistenceDelegates = new List<ITriggerPersistenceDelegate>();
         private string schedNameLiteral;
         private IObjectSerializer objectSerializer;
+        private readonly Dictionary<string, string> cachedQueries = new Dictionary<string, string>();
 
         protected IDbProvider DbProvider { get; private set; }
 
@@ -920,7 +921,7 @@ namespace Quartz.Impl.AdoJobStore
             {
                 try
                 {
-                    var properties = await GetMapFromProperties(rs, colIndex);
+                    var properties = await GetMapFromProperties(rs, colIndex).ConfigureAwait(false);
                     return properties;
                 }
                 catch (InvalidCastException)
@@ -928,7 +929,7 @@ namespace Quartz.Impl.AdoJobStore
                     // old data from user error or XML scheduling plugin data
                     try
                     {
-                        return await GetObjectFromBlob<IDictionary>(rs, colIndex);
+                        return await GetObjectFromBlob<IDictionary>(rs, colIndex).ConfigureAwait(false);
                     }
                     catch
                     {
@@ -940,7 +941,7 @@ namespace Quartz.Impl.AdoJobStore
             }
             try
             {
-                return await GetObjectFromBlob<IDictionary>(rs, colIndex);
+                return await GetObjectFromBlob<IDictionary>(rs, colIndex).ConfigureAwait(false);
             }
             catch (InvalidCastException)
             {
@@ -948,7 +949,7 @@ namespace Quartz.Impl.AdoJobStore
                 try
                 {
                     // we use this then
-                    return await GetMapFromProperties(rs, colIndex);
+                    return await GetMapFromProperties(rs, colIndex).ConfigureAwait(false);
                 }
                 catch
                 {
@@ -1838,7 +1839,7 @@ namespace Quartz.Impl.AdoJobStore
                 }
                 catch (InvalidOperationException)
                 {
-                    if (await IsTriggerStillPresent(conn, cancellationToken).ConfigureAwait(false))
+                    if (await IsTriggerStillPresent(conn, triggerKey, cancellationToken).ConfigureAwait(false))
                     {
                         throw;
                     }
@@ -1876,10 +1877,14 @@ namespace Quartz.Impl.AdoJobStore
 
         private async Task<bool> IsTriggerStillPresent(
             ConnectionAndTransactionHolder conn,
+            TriggerKey triggerKey,
             CancellationToken cancellationToken)
         {
             using (var cmd = PrepareCommand(conn, ReplaceTablePrefix(SqlSelectTrigger)))
             {
+                AddCommandParameter(cmd, "triggerName", triggerKey.Name);
+                AddCommandParameter(cmd, "triggerGroup", triggerKey.Group);
+
                 using (var rs = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false))
                 {
                     return await rs.ReadAsync(cancellationToken).ConfigureAwait(false);
@@ -2990,7 +2995,12 @@ namespace Quartz.Impl.AdoJobStore
         /// <returns>The query, with proper table prefix substituted</returns>
         protected string ReplaceTablePrefix(string query)
         {
-            return AdoJobStoreUtil.ReplaceTablePrefix(query, tablePrefix, SchedulerNameLiteral);
+            if (!cachedQueries.TryGetValue(query, out var result))
+            {
+                cachedQueries[query] = result = AdoJobStoreUtil.ReplaceTablePrefix(query, tablePrefix, SchedulerNameLiteral);
+            }
+            
+            return result;
         }
 
         protected string SchedulerNameLiteral

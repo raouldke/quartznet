@@ -138,7 +138,11 @@ namespace Quartz.Impl
 
         private static readonly ILog log = LogProvider.GetLogger(typeof(StdSchedulerFactory));
 
-        private string SchedulerName => cfg.GetStringProperty(PropertySchedulerInstanceName, "QuartzScheduler");
+        private string SchedulerName
+        {
+            // ReSharper disable once ArrangeAccessorOwnerBody
+            get { return cfg.GetStringProperty(PropertySchedulerInstanceName, "QuartzScheduler"); }
+        }
 
         private ILog Log => log;
 
@@ -205,7 +209,7 @@ namespace Quartz.Impl
                 throw initException;
             }
 
-            var props = (NameValueCollection) ConfigurationManager.GetSection(ConfigurationSectionName);
+            var props = Util.Configuration.GetSection(ConfigurationSectionName);
             string requestedFile = QuartzEnvironment.GetEnvironmentVariable(PropertiesFile);
             string propFileName = !string.IsNullOrWhiteSpace(requestedFile) ? requestedFile : "~/quartz.config";
 
