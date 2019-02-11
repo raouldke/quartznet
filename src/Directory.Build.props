@@ -27,7 +27,7 @@
 
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 
-    <VersionPrefix>3.0.6</VersionPrefix>
+    <VersionPrefix>3.0.8</VersionPrefix>
     <VersionSuffix Condition="'$(VersionSuffix)'!='' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
 
     <CLSCompliant>True</CLSCompliant>
@@ -45,7 +45,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsTestProject)' != 'true' and '$(SourceLinkEnabled)' != 'false'">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63102-01" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All"/>
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == '$(TargetFullFrameworkVersion)' ">

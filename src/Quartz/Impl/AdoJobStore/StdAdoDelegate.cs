@@ -52,6 +52,7 @@ namespace Quartz.Impl.AdoJobStore
     public class StdAdoDelegate : StdAdoConstants, IDriverDelegate, IDbAccessor
     {
         private const string FileScanListenerName = "FILE_SCAN_LISTENER_NAME";
+        private const string DirectoryScanListenerName = "DIRECTORY_SCAN_LISTENER_NAME";
 
         private ILog logger;
         private string tablePrefix = DefaultTablePrefix;
@@ -1461,6 +1462,37 @@ namespace Quartz.Impl.AdoJobStore
         }
 
         /// <summary>
+        /// Update the given trigger to the given new state, if it is in the given
+        /// old state and has the given next fire time.
+        /// </summary>
+        /// <param name="conn">The DB connection</param>
+        /// <param name="triggerKey">The key identifying the trigger.</param>
+        /// <param name="newState">The new state for the trigger </param>
+        /// <param name="oldState">The old state the trigger must be in</param>
+        /// <param name="nextFireTime">The next fire time the trigger must have</param>
+        /// <param name="cancellationToken">The cancellation instruction.</param>
+        /// <returns> int the number of rows updated</returns>
+        public async Task<int> UpdateTriggerStateFromOtherStateWithNextFireTime(
+            ConnectionAndTransactionHolder conn,
+            TriggerKey triggerKey,
+            string newState,
+            string oldState,
+            DateTimeOffset nextFireTime,
+            CancellationToken cancellationToken = default)
+        {
+            using (var cmd = PrepareCommand(conn, ReplaceTablePrefix(SqlUpdateTriggerStateFromStateWithNextFireTime)))
+            {
+                AddCommandParameter(cmd, "newState", newState);
+                AddCommandParameter(cmd, "triggerName", triggerKey.Name);
+                AddCommandParameter(cmd, "triggerGroup", triggerKey.Group);
+                AddCommandParameter(cmd, "oldState", oldState);
+                AddCommandParameter(cmd, "nextFireTime", GetDbDateTimeValue(nextFireTime));
+
+                return await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
         /// Update all of the triggers of the given group to the given new state, if
         /// they are in the given old state.
         /// </summary>
@@ -1861,6 +1893,7 @@ namespace Quartz.Impl.AdoJobStore
                 if (map != null)
                 {
                     tb.UsingJobData(new JobDataMap(map));
+                    tb.ClearDirty();
                 }
 
                 trigger = (IOperableTrigger) tb.Build();
@@ -3038,7 +3071,7 @@ namespace Quartz.Impl.AdoJobStore
         /// <returns>the serialized data as byte array</returns>
         public virtual byte[] SerializeJobData(JobDataMap data)
         {
-            bool skipStringPropertySerialization = data.ContainsKey(FileScanListenerName);
+            bool skipStringPropertySerialization = data.ContainsKey(FileScanListenerName) || data.ContainsKey(DirectoryScanListenerName);
             if (CanUseProperties && !skipStringPropertySerialization)
             {
                 return SerializeProperties(data);
